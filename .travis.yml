@@ -1,0 +1,12 @@
+language: node_js
+
+node_js:
+  - "10"
+
+branches:
+  only:
+    - master
+    - /v\d+.\d+(\.d+)?(-[a-zA-Z0-9]+)?/
+
+git:
+  depth: 2
