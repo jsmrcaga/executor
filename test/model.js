@@ -117,12 +117,16 @@ describe('Model', () => {
 		});
 	});
 
-	it('Should extend a model and save', done => {
+	it('Should extend a model and save and keep methods', done => {
 		class MyUser extends User {
 			constructor(name, lastname) {
 				super();
 				this.name = name;
 				this.lastname = lastname;
+			}
+
+			sayHello() {
+				return `Hello ${this.name}`;
 			}
 		}
 
@@ -136,6 +140,8 @@ describe('Model', () => {
 			expect(testUser.id).to.be.eql(test.id);
 			expect(testUser.name).to.be.eql('TestUser');
 			expect(testUser.lastname).to.be.eql('Some lastname');
+			expect(testUser.sayHello).to.be.instanceOf(Function);
+			expect(testUser.sayHello()).to.be.eql('Hello TestUser');
 			done();
 
 		}).catch(e => {
