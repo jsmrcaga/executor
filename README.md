@@ -26,15 +26,26 @@ const myDB = new Database('test-db', {
 });
 
 
-const User = myDB.model('User');
+const UserModel = myDB.model('User');
 
 // can also be defined as
-// const User = ModelFactory(myDB, 'User');
+// const UserModel = ModelFactory(myDB, 'User');
 
-const me = new User();
+class User extends UserModel {
+	constructor(name, lastname) {
+		super();
+		this.name = name;
+		this.lastname = lastname;
+	}
+}
+
+const me = new UserModel();
 me.name = 'Test';
 me.lastname = 'User';
 await me.save();
+
+const brother = new User('Brother', 'User');
+brother.save();
 
 const Account = myDB.model('Account');
 
@@ -50,7 +61,7 @@ assert(annotatedMe.account.id === account.id);
 let [myself] = await User.get({id: me.id});
 let allOfUs = await User.all();
 
-allOfUs = allOfUs.map(person => person.age = Math.random() * 100);
+allOfUs = allOfUs.map(person => {person.age = Math.random() * 100; return person;});
 
 await User.updateMany(allOfUs);
 

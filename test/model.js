@@ -34,6 +34,7 @@ describe('Model', () => {
 		// Mongo inherited by proxy
 		expect(model.findOne).to.be.instanceOf(Function);
 		expect(model.findOneAndReplace).to.be.instanceOf(Function);
+		expect(model.testProp).to.be.undefined;
 	});
 
 	it('Should instanciate a model and save it', done => {
@@ -111,6 +112,32 @@ describe('Model', () => {
 			expect(user.account[0].prop).to.be.eql(user.id);
 			expect(user.account[0].prop2).to.be.eql(user.name);
 			done();
+		}).catch(e => {
+			done(e);
+		});
+	});
+
+	it('Should extend a model and save', done => {
+		class MyUser extends User {
+			constructor(name, lastname) {
+				super();
+				this.name = name;
+				this.lastname = lastname;
+			}
+		}
+
+		const test = new MyUser('TestUser', 'Some lastname');
+		
+		test.save().then(() => {
+			return MyUser.get({id : test.id});
+
+		}).then(users => {
+			let [testUser] = users; 
+			expect(testUser.id).to.be.eql(test.id);
+			expect(testUser.name).to.be.eql('TestUser');
+			expect(testUser.lastname).to.be.eql('Some lastname');
+			done();
+
 		}).catch(e => {
 			done(e);
 		});
