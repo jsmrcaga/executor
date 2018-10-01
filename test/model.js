@@ -149,6 +149,34 @@ describe('Model', () => {
 		});
 	});
 
+	it('Should be able to find a model using Model#contains', done => {
+		let u = new User();
+		u.shopping = ['banana', 'mango', 'strawberry'];
+		u.cars = ['Tesla', 'BMW'];
+
+		u.save().then(() => {
+			return User.contains('shopping', ['banana', 'mango', 'strawberry']);
+		}).then(users => {
+			let [user] = users;
+			expect(user.id).to.be.eql(u.id);
+
+			return User.contains('shopping', ['banana', 'mango']);
+
+		}).then(users => {
+			let [user] = users;
+			expect(user.id).to.be.eql(u.id);
+
+			return User.contains('cars', 'Tesla');
+		}).then(users => {
+			let [user] = users;
+			expect(user.id).to.be.eql(u.id);
+
+			done();
+		}).catch(e => {
+			done(e);
+		});
+	});
+
 	after(done => {
 		database.disconnect().then(() => {
 			done();
