@@ -1,6 +1,6 @@
 {
   "name": "@jsmrcaga/mongo",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "MongoDB as it was Meant To Be (mmtb)",
   "main": "mongo.js",
   "scripts": {
