@@ -3,7 +3,7 @@ let db = {};
 db.update = function(collection, object) {
 	if (!object.id) {
 		let e =  new Error('[DB][UPDATE] Object does not have ID to replace (update)');
-		e.obj = object;
+		e.object = object;
 		throw e;
 	}
 
@@ -23,6 +23,19 @@ db.updateMany = function(collection, objects) {
 	});
 
 	return Promise.all(p);
+};
+
+db.deleteMany = function(collection, objects) {
+	let ids = objects.map(obj => obj.id);
+	return collection.deleteMany({
+		id: {
+			$in: ids
+		}
+	});
+};
+
+db.delete = function(collection, object) {
+	return db.deleteMany(collection, [object]);
 };
 
 module.exports = db;

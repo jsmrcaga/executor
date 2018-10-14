@@ -177,6 +177,69 @@ describe('Model', () => {
 		});
 	});
 
+	it('Should create and then delete models with static method', done => {
+		let u1 = new User();
+		let u2 = new User();
+		let u3 = new User();
+
+		let userIds = [u1, u2, u3].map(user => user.id);
+
+		let getUsers = () => {
+			return User.get({
+				id: {
+					$in: userIds
+				}
+			});
+		};
+
+		User.insertMany([u1, u2, u3]).then(() => {
+			return getUsers();
+		}).then(users => {
+			expect(users.length).to.be.eql(3);
+
+			return User.delete(u1);
+		}).then(() => {
+			return getUsers();
+		}).then(users => {
+			expect(users.length).to.be.eql(2);
+
+			return User.delete([u2, u3]);
+		}).then(() => {
+			return getUsers();
+		}).then(users => {
+			expect(users.length).to.be.eql(0);
+			done();
+		}).catch(e => {
+			done(e);
+		});
+	});
+
+	it('Should create and delete an instance', done => {
+		let u1 = new User();
+
+		u1.save().then(() => {
+			return User.get({
+				id: u1.id
+			});
+		}).then(users => {
+			let [user] = users;
+
+			expect(users.length).to.be.eql(1);
+			expect(user.id).to.be.eql(u1.id);
+
+			return user.delete();
+		}).then(() => {
+			return User.get({
+				id: u1.id
+			});
+		}).then(users => {
+			expect(users.length).to.be.eql(0);
+			done();
+		}).catch(e => {
+			done(e);
+		});
+	});
+
 	after(done => {
 		database.disconnect().then(() => {
 			done();
