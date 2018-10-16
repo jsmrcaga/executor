@@ -240,6 +240,47 @@ describe('Model', () => {
 		});
 	});
 
+	it('Should remove a model from database', done => {
+		let u1 = new User();
+
+		u1.save().then(() => {
+			return User.get({
+				id: u1.id
+			});
+		}).then(users => {
+			expect(users.length).to.be.eql(1);
+
+			let [user] = users;
+			expect(user.id).to.be.eql(u1.id);
+			expect(user.__deleted).to.be.eql(false);
+
+			// remove from u1 to keep reference
+			return u1.remove();
+		}).then(() => {
+			return User.get({
+				id: u1.id
+			});
+		}).then(users => {
+			expect(users.length).to.be.eql(0);
+
+			return User.get({
+				id: u1.id,
+				__deleted: u1.__deleted
+			});
+		}).then(users => {
+			expect(users.length).to.be.eql(1);
+
+			let [user] = users;
+			expect(user.id).to.be.eql(u1.id);
+			expect(user.__deleted).to.be.eql(u1.__deleted);
+
+			done();
+
+		}).catch(error => {
+			done(error);
+		});
+	});
+
 	after(done => {
 		database.disconnect().then(() => {
 			done();
