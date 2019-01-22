@@ -70,6 +70,18 @@ await User.insertMany(allOfThem);
 
 // coming in the next weeks
 let [myFacebookAccount] = Account.query('type=facebook (user=54 or name="Test") token_expired=false');
+
+// CONNECTION
+myDB.connect({
+	protocol, 
+	endpoint, 
+	username, 
+	password,
+	port, 
+	database,
+	timeout, 
+	...mongoUsualConnectionOptions
+});
 ```
 
 # API
