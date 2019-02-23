@@ -177,6 +177,30 @@ describe('Model', () => {
 		});
 	});
 
+	it('Should update creation date for a model', done => {
+		let u = new User();
+		u.name = 'Test';
+		u.lastname = 'User';
+
+		let now = Date.now();
+		u.save().then(() => {
+			// Allow 10 ms difference
+			expect(u.__updated).to.be.within(now, now + 10);
+			u.lastname = 'Test';
+
+			now = Date.now();
+			return u.save();
+		}).then(() => {
+			return User.get({ id: u.id });
+		}).then(([user]) => {
+			expect(user.lastname).to.be.eql('Test');
+			expect(user.__updated).to.be.within(now, now + 10);
+			done();
+		}).catch(e => {
+			done(e);
+		});
+	});
+
 	it('Should create and then delete models with static method', done => {
 		let u1 = new User();
 		let u2 = new User();

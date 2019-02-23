@@ -7,11 +7,17 @@ db.update = function(collection, object) {
 		throw e;
 	}
 
+	// Last update date
+	object.__updated = Date.now();
+
 	let replacer = { id: object.id };
+
 	return collection.findOneAndReplace(replacer, object).then(res => {
 		if(res.lastErrorObject && !res.lastErrorObject.updatedExisting) {
-			return collection.insertOne(object);
+			return collection.insertOne(object).then(() => object);
 		}
+
+		return object;
 	});
 };
 
@@ -22,7 +28,7 @@ db.updateMany = function(collection, objects) {
 		p.push(db.update(collection, obj));
 	});
 
-	return Promise.all(p);
+	return Promise.all(p).then(() => objects);
 };
 
 db.deleteMany = function(collection, objects) {
