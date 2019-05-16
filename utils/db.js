@@ -1,6 +1,6 @@
 let db = {};
 
-db.update = function(collection, object) {
+db.update = function(collection, object, options = {}) {
 	if (!object.id) {
 		let e =  new Error('[DB][UPDATE] Object does not have ID to replace (update)');
 		e.object = object;
@@ -12,36 +12,40 @@ db.update = function(collection, object) {
 
 	let replacer = { id: object.id };
 
-	return collection.findOneAndReplace(replacer, object).then(res => {
+	if(!object._id){
+		return collection.insertOne(object, options).then(() => object);
+	}
+
+	return collection.findOneAndReplace(replacer, object, options).then(res => {
 		if(res.lastErrorObject && !res.lastErrorObject.updatedExisting) {
-			return collection.insertOne(object).then(() => object);
+			return collection.insertOne(object, options).then(() => object);
 		}
 
 		return object;
 	});
 };
 
-db.updateMany = function(collection, objects) {
+db.updateMany = function(collection, objects, options = {}) {
 	let p = [];
 
 	objects.forEach(obj => {
-		p.push(db.update(collection, obj));
+		p.push(db.update(collection, obj, options));
 	});
 
 	return Promise.all(p).then(() => objects);
 };
 
-db.deleteMany = function(collection, objects) {
+db.deleteMany = function(collection, objects, options = {}) {
 	let ids = objects.map(obj => obj.id);
 	return collection.deleteMany({
 		id: {
 			$in: ids
 		}
-	});
+	}, options);
 };
 
-db.delete = function(collection, object) {
-	return db.deleteMany(collection, [object]);
+db.delete = function(collection, object, options = {}) {
+	return db.deleteMany(collection, [object], options);
 };
 
 module.exports = db;

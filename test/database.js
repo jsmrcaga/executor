@@ -4,12 +4,14 @@ const {db, sleep} = require('../utils/test');
 
 describe('Generic test', () => {
 	it('Should create a database and connect/disconnect', done => {
+		const { username, password, endpoint, port, database } = require('./db-config.json');
+
 		let db = new Database('test-db', {
-			username: 'test-user',
-			password: 'mypassword1',
-			endpoint: 'ds046037.mlab.com',
-			port: 46037,
-			database: 'mongolian'
+			username,
+			password,
+			endpoint,
+			port,
+			database
 		});
 
 		db.connect().then(() => {

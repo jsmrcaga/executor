@@ -1,15 +1,16 @@
 const {Database} = require('../mongo');
 module.exports = {
 	db: () => {
-		let database = new Database('test-db', {
-			username: 'test-user',
-			password: 'mypassword1',
-			endpoint: 'ds046037.mlab.com',
-			port: 46037,
-			database: 'mongolian'
+		const { username, password, endpoint, port, database } = require('../test/db-config.json');
+		let db = new Database('test-db', {
+			username,
+			password,
+			endpoint,
+			port,
+			database
 		});
 
-		return database;
+		return db;
 	},
 
 	sleep: time => new Promise(y => setTimeout(y, time))
