@@ -46,6 +46,32 @@ describe('Model', () => {
 		});
 	});
 
+	it('Should update a model with new data without saving', () => {
+		let user = new User();
+		user.update({
+			name: 'jo',
+			lastname: 'colina'
+		});
+
+		expect(user.name).to.be.eql('jo');
+		expect(user.lastname).to.be.eql('colina');
+	});
+
+	it('Should update a model with new data and save', done => {
+		let user = new User();
+		user.update({
+			name: 'jo',
+			lastname: 'colina'
+		}).save().then(user => {
+			expect(user.name).to.be.eql('jo');
+			expect(user.lastname).to.be.eql('colina');
+			done();
+		}).catch(e => {
+			done(e);
+		});
+
+	});
+
 	it('Should get an object instance', done => {
 		User.get({
 			id: testUser.id
@@ -302,6 +328,91 @@ describe('Model', () => {
 
 		}).catch(error => {
 			done(error);
+		});
+	});
+
+	it('Should create an index from a model', done => {
+		User.createIndex({ name: 1 }).then(() => {
+			return User.indexes();
+		}).then(indexes => {
+			let index = indexes.find(index => index.key['name'] !== undefined);
+			expect(index).to.not.be.undefined;
+			expect(index.key.name).to.be.eql(1);
+			done();
+		}).catch(e => done(e));
+	});
+
+	it('Should create multiple indexes from a model, one by one', done => {
+		User.createIndexes([{key: { lastname: 1 }}, {key: { id: -1 }}]).then(() => {
+			return User.indexes();
+		}).then(indexes => {
+			for (let key of ['lastname', 'id']) {
+				let index = indexes.find(index => index.key[key] !== undefined);
+				expect(index).to.not.be.undefined;
+				expect(index.key[key]).to.be.eql(key === 'lastname' ? 1 : -1);
+			}
+
+			done();
+		}).catch(e => done(e));
+	});
+
+	it('Should create multiple indexes from a model, bulk', done => {
+		User.createIndexes([{ key: {holder: 1 }}, { key: { account: -1 }}], { bulk: true }).then(() => {
+			return User.indexes();
+		}).then(indexes => {
+			for (let key of ['holder', 'account']) {
+				let index = indexes.find(index => index.key[key] !== undefined);
+				expect(index).to.not.be.undefined;
+				expect(index.key[key]).to.be.eql(key === 'holder' ? 1 : -1);
+			}
+
+			done();
+		}).catch(e => done(e));
+	});
+
+	it('Should create multiple indexes when creating a model (connected db)', done => {
+		const Account = database.model('Account', [
+			{key: { holder: 1 }},
+			{key: { name: 1 }}
+		]);
+
+		Account.indexes().then(indexes => {
+			let index = indexes.find(index => index.key['holder'] !== undefined);
+			expect(index).to.not.be.undefined;
+			expect(index.key['holder']).to.be.eql(1);
+			expect(database.__indexes).to.be.undefined;
+			done();
+		}).catch(e => {
+			done(e);
+		});
+	});
+
+	it('Should create multiple indexes when creating a model (disconnected db)', done => {
+		database.disconnect().then(() => {
+			expect(database.__indexes).to.be.undefined;
+
+			const Account = database.model('Account', [
+				{key: { holder: 1 }},
+				{key: { name: 1 }}
+			]);
+
+			expect(database.__indexes).to.not.be.undefined;
+			expect(database.__indexes[0]).to.have.property('Model');
+
+			return database.connect();
+		}).then(() => {
+			return Account.indexes()	
+		}).then(indexes => {
+			let index = indexes.find(index => index.key['holder'] !== undefined);
+			expect(index).to.not.be.undefined;
+			expect(index.key['holder']).to.be.eql(1);
+			expect(database.__indexes).to.be.undefined;
+
+			return database.connect();
+		}).then(() => {
+			done();
+		}).catch(e => {
+			done(e);
 		});
 	});
 
