@@ -1,6 +1,6 @@
 {
   "name": "@jsmrcaga/mongo",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "MongoDB as it was Meant To Be (mmtb)",
   "main": "mongo.js",
   "scripts": {
@@ -18,11 +18,11 @@
     "nyc": "^13.3.0"
   },
   "dependencies": {
-    "mongodb": "^3.1.6"
+    "mongodb": "^3.5.3"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jsmrcaga/mttb"
+    "url": "https://github.com/jsmrcaga/mmtb"
   },
   "keywords": [
     "mongo",
