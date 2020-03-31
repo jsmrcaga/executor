@@ -14,6 +14,8 @@ describe('Model', () => {
 
 	before(done => {
 		database.connect().then(() => {
+			return database.clear();
+		}).then(() => {
 			done();
 		}).catch(e => {
 			done(e);
@@ -75,8 +77,7 @@ describe('Model', () => {
 	it('Should get an object instance', done => {
 		User.get({
 			id: testUser.id
-		}).then(users => {
-			let [user] = users;
+		}).then(user => {
 			expect(user.name).to.be.eql(testUser.name);
 			expect(user.lastName).to.be.eql(testUser.lastName);
 			done();
@@ -161,8 +162,7 @@ describe('Model', () => {
 		test.save().then(() => {
 			return MyUser.get({id : test.id});
 
-		}).then(users => {
-			let [testUser] = users; 
+		}).then(testUser => {
 			expect(testUser.id).to.be.eql(test.id);
 			expect(testUser.name).to.be.eql('TestUser');
 			expect(testUser.lastname).to.be.eql('Some lastname');
@@ -181,18 +181,18 @@ describe('Model', () => {
 		u.cars = ['Tesla', 'BMW'];
 
 		u.save().then(() => {
-			return User.contains('shopping', ['banana', 'mango', 'strawberry']);
+			return User.contains('shopping', ['banana', 'mango', 'strawberry']).toArray();
 		}).then(users => {
 			let [user] = users;
 			expect(user.id).to.be.eql(u.id);
 
-			return User.contains('shopping', ['banana', 'mango']);
+			return User.contains('shopping', ['banana', 'mango']).toArray();
 
 		}).then(users => {
 			let [user] = users;
 			expect(user.id).to.be.eql(u.id);
 
-			return User.contains('cars', 'Tesla');
+			return User.contains('cars', 'Tesla').toArray();
 		}).then(users => {
 			let [user] = users;
 			expect(user.id).to.be.eql(u.id);
@@ -218,7 +218,7 @@ describe('Model', () => {
 			return u.save();
 		}).then(() => {
 			return User.get({ id: u.id });
-		}).then(([user]) => {
+		}).then(user => {
 			expect(user.lastname).to.be.eql('Test');
 			expect(user.__updated).to.be.within(now, now + 10);
 			done();
@@ -235,7 +235,7 @@ describe('Model', () => {
 		let userIds = [u1, u2, u3].map(user => user.id);
 
 		let getUsers = () => {
-			return User.get({
+			return User.filter({
 				id: {
 					$in: userIds
 				}
@@ -245,19 +245,25 @@ describe('Model', () => {
 		User.insertMany([u1, u2, u3]).then(() => {
 			return getUsers();
 		}).then(users => {
-			expect(users.length).to.be.eql(3);
+			return users.count();
+		}).then(count => {
+			expect(count).to.be.eql(3);
 
 			return User.delete(u1);
 		}).then(() => {
 			return getUsers();
 		}).then(users => {
-			expect(users.length).to.be.eql(2);
+			return users.count();
+		}).then(count => {
+			expect(count).to.be.eql(2);
 
 			return User.delete([u2, u3]);
 		}).then(() => {
 			return getUsers();
 		}).then(users => {
-			expect(users.length).to.be.eql(0);
+			return users.count();
+		}).then(count => {
+			expect(count).to.be.eql(0);
 			done();
 		}).catch(e => {
 			done(e);
@@ -271,19 +277,18 @@ describe('Model', () => {
 			return User.get({
 				id: u1.id
 			});
-		}).then(users => {
-			let [user] = users;
-
-			expect(users.length).to.be.eql(1);
+		}).then(user => {
 			expect(user.id).to.be.eql(u1.id);
 
 			return user.delete();
 		}).then(() => {
-			return User.get({
+			return User.filter({
 				id: u1.id
 			});
 		}).then(users => {
-			expect(users.length).to.be.eql(0);
+			return users.count();
+		}).then(count => {
+			expect(count).to.be.eql(0);
 			done();
 		}).catch(e => {
 			done(e);
@@ -294,9 +299,9 @@ describe('Model', () => {
 		let u1 = new User();
 
 		u1.save().then(() => {
-			return User.get({
+			return User.filter({
 				id: u1.id
-			});
+			}).toArray();
 		}).then(users => {
 			expect(users.length).to.be.eql(1);
 
@@ -307,16 +312,16 @@ describe('Model', () => {
 			// remove from u1 to keep reference
 			return u1.remove();
 		}).then(() => {
-			return User.get({
+			return User.find({
 				id: u1.id
-			});
+			}).toArray();
 		}).then(users => {
 			expect(users.length).to.be.eql(0);
 
-			return User.get({
+			return User.filter({
 				id: u1.id,
 				__deleted: u1.__deleted
-			});
+			}).toArray();
 		}).then(users => {
 			expect(users.length).to.be.eql(1);
 

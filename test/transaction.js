@@ -41,7 +41,7 @@ describe('Transactions', () => {
 		transaction.add(user_save);
 
 		transaction.abort().then(() => {
-			return User.get({ test: 'test1' });
+			return User.filter({ test: 'test1' }).toArray();
 		}).then(users => {
 			expect(users.length).to.be.eql(0);
 			done();
@@ -61,8 +61,8 @@ describe('Transactions', () => {
 
 		transaction.commit().then(() => {
 			return User.get({ test: 'test2' });
-		}).then(users => {
-			expect(users.length).to.be.eql(1);
+		}).then(user => {
+			expect(user).to.not.be.undefined;
 			done();
 		}).catch(e => done(e));
 	});
@@ -76,8 +76,8 @@ describe('Transactions', () => {
 
 		transaction.add(user_save);
 
-		User.get({ test: 'poulet-3000' }).then(users => {
-			expect(users.length).to.be.eql(0);
+		User.get({ test: 'poulet-3000' }).then(user => {
+			expect(user).to.be.undefined;
 
 			return transaction.abort();
 		}).then(() => {
@@ -96,8 +96,8 @@ describe('Transactions', () => {
 
 		transaction.add(user_save);
 
-		User.get({ test: 'poulet-3000' }).then(users => {
-			expect(users.length).to.be.eql(0);
+		User.get({ test: 'poulet-3000' }).then(user => {
+			expect(user).to.be.undefined;
 
 			return transaction.abort();
 		}).then(() => {
@@ -125,14 +125,11 @@ describe('Transactions', () => {
 
 		transaction.commit().then(() => {
 			return Promise.all([User.get({ test: 'test3' }), User.get({ value: 23546 })]);
-		}).then(([users1, users2]) => {
-			let [user1] = users1;
-			let [user2] = users2;
-
-			expect(users1.length).to.be.eql(1);
+		}).then(([user1, user2]) => {
+			expect(user1).not.to.be.undefined;
 			expect(user1.test).to.be.eql('test3');
 
-			expect(users2.length).to.be.eql(1);
+			expect(user2).not.to.be.undefined;
 			expect(user2.value).to.be.eql(23546);
 
 			done();
@@ -180,12 +177,12 @@ describe('Transactions', () => {
 
 		transaction.abort().then(() => {
 			return User.get({ name: user.name });
-		}).then(users => {
-			expect(users.length).to.be.eql(0);
+		}).then(user => {
+			expect(user).to.be.undefined;
 			return User.get({ name: user2.name });
-		}).then(users => {
-			expect(users.length).to.be.eql(0);
-			return Transfer.get({ id: transfer.id });
+		}).then(user => {
+			expect(user).to.be.undefined;
+			return Transfer.filter({ id: transfer.id }).toArray();
 		}).then(transfers => {
 			expect(transfers.length).to.be.eql(0);
 			done();
@@ -197,20 +194,18 @@ describe('Transactions', () => {
 
 		transaction.commit().then(() => {
 			return User.get({ name: user.name });
-		}).then(users => {
-			let [user1] = users;
-			expect(users.length).to.be.eql(1);
+		}).then(user1 => {
+			expect(user1).not.to.be.undefined;
 			expect(user1.name).to.be.eql(user.name);
 			expect(user1.money).to.be.eql(user.money);
 
 			return User.get({ name: user2.name });
-		}).then(users => {
-			let [user21] = users;
-			expect(users.length).to.be.eql(1);
+		}).then(user21 => {
+			expect(user21).not.to.be.undefined;
 			expect(user21.name).to.be.eql(user2.name);
 			expect(user21.money).to.be.eql(user2.money);
 			
-			return Transfer.get({ id: transfer.id });
+			return Transfer.find({ id: transfer.id }).toArray();
 		}).then(transfers => {
 			let [transfer1] = transfers;
 			expect(transfers.length).to.be.eql(1);
@@ -245,11 +240,11 @@ describe('Transactions', () => {
 		tr2.add(u2_save, t2_save);
 
 		Promise.all([tr1.commit(), tr2.commit()]).then(() => {
-			return User.get({
+			return User.find({
 				name: {
 					$in: ['u1', 'u2']
 				}
-			});
+			}).toArray();
 		}).then(users => {
 			let u1 = users.find(u => u.name === 'u1');
 			let u2 = users.find(u => u.name === 'u2');
@@ -257,11 +252,11 @@ describe('Transactions', () => {
 			expect(u1).to.not.be.undefined;
 			expect(u2).to.not.be.undefined;
 
-			return Transfer.get({
+			return Transfer.find({
 				qtty: {
 					$in: [1, 25]
 				}
-			});
+			}).toArray();
 		}).then(transfers => {
 			let t1 = transfers.find(t => t.qtty === 1);
 			let t2 = transfers.find(t => t.qtty === 25);

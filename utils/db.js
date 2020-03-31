@@ -25,16 +25,6 @@ db.update = function(collection, object, options = {}) {
 	});
 };
 
-db.updateMany = function(collection, objects, options = {}) {
-	let p = [];
-
-	objects.forEach(obj => {
-		p.push(db.update(collection, obj, options));
-	});
-
-	return Promise.all(p).then(() => objects);
-};
-
 db.deleteMany = function(collection, objects, options = {}) {
 	let ids = objects.map(obj => obj.id);
 	return collection.deleteMany({
