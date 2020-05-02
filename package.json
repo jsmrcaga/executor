@@ -1,11 +1,11 @@
 {
   "name": "@jsmrcaga/mongo",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "MongoDB as it was Meant To Be (mmtb)",
   "main": "mongo.js",
   "scripts": {
     "doc": "npx esdoc",
-    "test": "nyc mocha --exit test"
+    "test": "mocha --exit test"
   },
   "author": {
     "name": "Jo Colina",
