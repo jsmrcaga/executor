@@ -87,63 +87,6 @@ describe('Model', () => {
 		});
 	});
 
-	it('Should find related accounts automatically', done => {
-		let account = new Account();
-		account.user = testUser.id;
-		account.prop = testUser.id;
-		account.prop2 = testUser.name;
-
-		account.save().then(async () => {
-			await sleep(10);
-			return testUser.related(Account);
-
-		}).then(accounts => {
-			let [account] = accounts;
-			expect(account.user).to.be.eql(testUser.id);
-			expect(account.prop).to.be.eql(testUser.id);
-			done();
-		}).catch(e => {
-			done(e);
-		});
-	});
-
-	it('Should find related accounts by prop', done => {
-		testUser.related(Account, 'prop').then(accounts => {
-			let [account] = accounts;
-			expect(account.user).to.be.eql(testUser.id);
-			expect(account.prop).to.be.eql(testUser.id);
-			done();
-
-		}).catch(e => {
-			done(e);
-		});
-	});
-
-	it('Should find related accounts by prop and myProp', done => {
-		testUser.related(Account, 'prop2', 'name').then(accounts => {
-			let [account] = accounts;
-			expect(account.user).to.be.eql(testUser.id);
-			expect(account.prop).to.be.eql(testUser.id);
-			done();
-
-		}).catch(e => {
-			done(e);
-		});
-	});
-
-	it('Should find related accounts and annotate', done => {
-		testUser.annotate(Account).then(user => {
-			expect(user).to.have.property('account');
-			expect(user.account).to.have.lengthOf(1);
-			expect(user.account[0].user).to.be.eql(user.id);
-			expect(user.account[0].prop).to.be.eql(user.id);
-			expect(user.account[0].prop2).to.be.eql(user.name);
-			done();
-		}).catch(e => {
-			done(e);
-		});
-	});
-
 	it('Should extend a model and save and keep methods', done => {
 		class MyUser extends User {
 			constructor(name, lastname) {
@@ -170,34 +113,6 @@ describe('Model', () => {
 			expect(testUser.sayHello()).to.be.eql('Hello TestUser');
 			done();
 
-		}).catch(e => {
-			done(e);
-		});
-	});
-
-	it('Should be able to find a model using Model#contains', done => {
-		let u = new User();
-		u.shopping = ['banana', 'mango', 'strawberry'];
-		u.cars = ['Tesla', 'BMW'];
-
-		u.save().then(() => {
-			return User.contains('shopping', ['banana', 'mango', 'strawberry']).toArray();
-		}).then(users => {
-			let [user] = users;
-			expect(user.id).to.be.eql(u.id);
-
-			return User.contains('shopping', ['banana', 'mango']).toArray();
-
-		}).then(users => {
-			let [user] = users;
-			expect(user.id).to.be.eql(u.id);
-
-			return User.contains('cars', 'Tesla').toArray();
-		}).then(users => {
-			let [user] = users;
-			expect(user.id).to.be.eql(u.id);
-
-			done();
 		}).catch(e => {
 			done(e);
 		});
@@ -235,7 +150,7 @@ describe('Model', () => {
 		let userIds = [u1, u2, u3].map(user => user.id);
 
 		let getUsers = () => {
-			return User.filter({
+			return User.find({
 				id: {
 					$in: userIds
 				}
@@ -282,7 +197,7 @@ describe('Model', () => {
 
 			return user.delete();
 		}).then(() => {
-			return User.filter({
+			return User.find({
 				id: u1.id
 			});
 		}).then(users => {
@@ -373,52 +288,6 @@ describe('Model', () => {
 
 			done();
 		}).catch(e => done(e));
-	});
-
-	it('Should create multiple indexes when creating a model (connected db)', done => {
-		const Account = database.model('Account', [
-			{key: { holder: 1 }},
-			{key: { name: 1 }}
-		]);
-
-		Account.indexes().then(indexes => {
-			let index = indexes.find(index => index.key['holder'] !== undefined);
-			expect(index).to.not.be.undefined;
-			expect(index.key['holder']).to.be.eql(1);
-			expect(database.__indexes).to.be.undefined;
-			done();
-		}).catch(e => {
-			done(e);
-		});
-	});
-
-	it('Should create multiple indexes when creating a model (disconnected db)', done => {
-		database.disconnect().then(() => {
-			expect(database.__indexes).to.be.undefined;
-
-			const Account = database.model('Account', [
-				{key: { holder: 1 }},
-				{key: { name: 1 }}
-			]);
-
-			expect(database.__indexes).to.not.be.undefined;
-			expect(database.__indexes[0]).to.have.property('Model');
-
-			return database.connect();
-		}).then(() => {
-			return Account.indexes()	
-		}).then(indexes => {
-			let index = indexes.find(index => index.key['holder'] !== undefined);
-			expect(index).to.not.be.undefined;
-			expect(index.key['holder']).to.be.eql(1);
-			expect(database.__indexes).to.be.undefined;
-
-			return database.connect();
-		}).then(() => {
-			done();
-		}).catch(e => {
-			done(e);
-		});
 	});
 
 	after(done => {
