@@ -6,7 +6,7 @@
   "scripts": {
     "doc": "npx esdoc",
     "test": "docker-compose run --rm app npm run mocha",
-    "mocha": "nyc mocha --exit --recursive test -s 50"
+    "mocha": "mocha --exit --recursive test -s 50"
   },
   "author": {
     "name": "Jo Colina",

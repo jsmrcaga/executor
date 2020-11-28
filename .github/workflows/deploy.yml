@@ -1,0 +1,26 @@
+name: 'Deploy'
+
+on:
+  release:
+    types: ['published']
+
+jobs:
+  deploy_npm:
+    name: 'Deploy to NPM'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@master
+
+  deploy_docs:
+    name: 'Deploy documentation to GitHub Pages'
+    runs-on: ubuntu-latest
+
+    # steps:
+    #   - uses: actions/checkout@master
+    #   - name: 'Install deps'
+    #     run: npm i
+    #   - name: 'Build docs'
+    #     run: npm run build
+    #   - name: 'Deploy'
+    #     run: git commit -m "v" && git push
