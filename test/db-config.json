@@ -1,7 +1,0 @@
-{
-	"username": "jsmrcaga",
-	"password": "test_password",
-	"endpoint": "localhost",
-	"port": 27017,
-	"database": "mmtb_test"
-}
