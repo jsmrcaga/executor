@@ -1,0 +1,20 @@
+version: "3.1"
+services:
+  db:
+    image: mongo:4
+    container_name: mongo-db
+    ports:
+      - "27017:27017"
+    # command: --replSet "mongoset" --bind_ip_all
+    # volumes:
+    #   - ./docker:/docker-entrypoint-initdb.d:ro
+
+  app:
+    build: .
+    depends_on:
+      - "db"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - /code/node_modules
+      - .:/code
