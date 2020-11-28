@@ -1,11 +1,12 @@
 {
   "name": "@jsmrcaga/mongo",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "MongoDB as it was Meant To Be (mmtb)",
   "main": "mongo.js",
   "scripts": {
     "doc": "npx esdoc",
-    "test": "mocha --exit test"
+    "test": "docker-compose run --rm app npm run mocha",
+    "mocha": "nyc mocha --exit --recursive test -s 50"
   },
   "author": {
     "name": "Jo Colina",
@@ -18,7 +19,7 @@
     "nyc": "^13.3.0"
   },
   "dependencies": {
-    "mongodb": "^3.5.3"
+    "mongodb": "^3.6.3"
   },
   "repository": {
     "type": "git",
@@ -29,9 +30,6 @@
     "mongodb",
     "mongo db",
     "mongodb easy",
-    "schema",
-    "schema-less",
-    "schema-free",
     "orm"
   ]
 }
