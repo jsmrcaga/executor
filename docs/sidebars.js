@@ -1,7 +1,16 @@
 module.exports = {
   someSidebar: {
-    'tl;dr': ['tldr'],
-    // Guide: ['doc1'],
-    // Reference: ['doc1'],
+	'tl;dr': ['tldr'],
+	Reference: [
+		'mongo',
+		'database',
+		'transaction',
+		'cursor',
+		'model',
+		'fields',
+		'manager',
+		'queryset',
+		'operation',
+	],
   },
 };
