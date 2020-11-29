@@ -2,7 +2,7 @@
 id: tldr
 title: tl;dr
 sidebar_label: tl;dr
-slug: /tldr
+slug: /
 ---
 
 ## What is @jsmrcaga/mongo
@@ -271,4 +271,50 @@ queryset.done().then(docs => {
 	}
 	*/
 })
+```
+## Transactions
+
+Transactions can be used as a context or as objects. The context version is just a wrapper for [`session.withTransaction()`](https://docs.mongodb.com/manual/core/transactions/#transactions-api).
+
+Mongo transactions need a `Session` to be created and passed to every query that needs to be performed on that transaction.
+
+`db.atomic()` provides you the session to add to your queries yourself, and `Transaction`s do it for you, but at the cost
+of binding your queries.
+
+### `db.atomic()` API
+```js
+const { Mongo } = require('@jsmrcaga/mongo');
+const my_db = Mongo.db();
+
+my_db.atomic(session => {
+	let s = { session };
+	return model.save({ session }).then(() => {
+		return model2.save({ session });
+	}).then(() => {
+		return model3.update({
+			name: 'new name'
+		}, { session });
+	});
+});
+```
+
+### Transaction objects
+
+```js
+const { Mongo } = require('@jsmrcaga/mongo');
+const my_db = Mongo.db();
+const transaction = my_db.transaction();
+
+// Pass function to call an args. Session will be appended automatically
+// Binding is necessary to ensure `this` is the real calling object
+transaction.add(model1.save.bind(model1));
+transaction.add(model2.update.bind(model2), { name: 'new name' });
+transaction.add(model3.update.bind(model3), { name: 'new name' }, { upsert: true });
+
+transaction.commit().then(() => {
+	console.log('OK');
+}).catch(e => {
+	console.log('NOK', e);
+});
+
 ```
