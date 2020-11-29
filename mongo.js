@@ -3,17 +3,20 @@ const Cursor = require('./lib/models/cursor');
 const Queryset = require('./lib/models/queryset');
 const Fields = require('./lib/models/fields');
 const Manager = require('./lib/models/manager');
+const Operations = require('./lib/models/queryset/operations');
 
+const Transaction = require('./lib/transaction');
 const Database = require('./lib/database');
 const Mongo = require('./lib/mongo');
-// Transactions
 
 module.exports = {
 	Mongo,
 	Database,
-	Model,
+	Transaction,
 	Cursor,
-	Queryset,
+	Model,
 	Fields,
-	Manager
+	Manager,
+	Queryset,
+	Operations,
 };
