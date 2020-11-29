@@ -52,10 +52,15 @@ module.exports = {
               label: 'GitHub',
               href: 'https://github.com/jsmrcaga/mmtb',
             },
+            {
+              label: 'Twitter',
+              href: 'https://twitter.com/jsmrcaga',
+            },
           ],
         },
+
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} @jsmrcaga, Inc. Built with Docusaurus.`,
     },
   },
   presets: [
@@ -66,13 +71,7 @@ module.exports = {
           sidebarPath: require.resolve('./sidebars.js'),
           // Please change this to your repo.
           editUrl:
-            'https://github.com/facebook/docusaurus/edit/master/website/',
-        },
-        blog: {
-          showReadingTime: true,
-          // Please change this to your repo.
-          editUrl:
-            'https://github.com/facebook/docusaurus/edit/master/website/blog/',
+            'https://github.com/jsmrcaga/mmbt/edit/master/docs/',
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
