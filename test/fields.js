@@ -19,12 +19,17 @@ class NeverValidatesField extends Fields.GenericField {
 
 class ModelA extends Model{}
 
+class ValidationModel extends Model{}
+ValidationModel.VALIDATION_SCHEMA = {
+	name: new Fields.String({ required: true, blank: false }),
+};
+
 describe('Fields', () => {
 	describe('Generic', () => {
 		it('is_valid - Validates required field', () => {
 			let field = new Fields.GenericField({ required: true });
-			expect(() => field.is_valid(null)).to.throw(Error);
-			expect(() => field.is_valid()).to.throw(Error);
+			expect(() => field.is_valid(null)).to.throw(Error, 'Required value');
+			expect(() => field.is_valid()).to.throw(Error, 'Required value');
 			let values = ['plep', 5, {}, [], true, new Date()];
 			for(let value of values) {
 				expect(field.is_valid(value)).to.be.true;
@@ -48,6 +53,12 @@ describe('Fields', () => {
 
 			expect(value_field.get_default()).to.be.eql(25);
 			expect(fun_field.get_default()).to.be.eql(46);
+		});
+
+		it('validate - Validates fields for given Model', () => {
+			expect(() => {
+				new ValidationModel();
+			}).to.throw(Error, 'Required value');
 		});
 	});
 
@@ -225,9 +236,14 @@ describe('Fields', () => {
 
 		let field = new Fields.ForeignKey({ Model: ModelA });
 		it('Validates foreign key models', () => {
-			expect(field.validate(0)).to.be.eql('Value is not an instance of ModelA');
-			expect(field.validate(new ModelA())).to.be.true;
+			expect(() => field.is_valid(0)).to.throw(Error, 'Value 0 is not an instance of ModelA');
+			expect(field.is_valid(new ModelA())).to.be.true;
 		});
+
+		it('Validats that name_id exists', () => {
+			// Validates that the _id value exists
+			expect(field.is_valid(null, 'a', { a_id: 1234 })).to.be.eql(true);
+		})
 
 		it('Casts values correctly', () => {
 			expect(() => field.cast(5)).to.throw(Error, 'ForeignKey field needs a model');
