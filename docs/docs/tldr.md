@@ -5,7 +5,7 @@ sidebar_label: tl;dr
 slug: /
 ---
 
-## What is @jsmrcaga/mongo
+## What is @jsmrcaga/executor
 
 This package is intended to help developers write fast and efficient Mongo queries.
 
@@ -17,7 +17,7 @@ It is loosely inspired by Django's ORM API, and implements utility methods to he
 ## Installation
 
 ```sh
-npm i @jsmrcaga/mongo
+npm i @jsmrcaga/executor
 ```
 
 ## Connection
@@ -28,7 +28,7 @@ Connections are made by passing a list of options. This library will not add opt
 and will let you decide what to pass. If you don't pass `useUnifiedTopology` Mongo will probably throw a warning.
 
 ```js
-const { Mongo } = require('@jsmrcaga/mongo');
+const { Mongo } = require('@jsmrcaga/executor');
 
 Mongo.connect({
 	url: 'mongodb://myusername:pswd@my_db_host:27017/my_db',
@@ -46,7 +46,7 @@ Mongo.connect({
 ### Using a Database
 
 ```js
-const { Mongo } = require('@jsmrcaga/mongo');
+const { Mongo } = require('@jsmrcaga/executor');
 
 // If defined in "options" under database
 const my_db = Mongo.db();
@@ -66,7 +66,7 @@ the model name.
 For example, if you have a model called `MySuperModel`, the corresponding collection would be `my-super-model`.
 
 ```js
-const { Model } = require('@jsmrcaga/mongo');
+const { Model } = require('@jsmrcaga/executor');
 
 class MySpecialModel extends Model {}
 
@@ -81,7 +81,7 @@ MySpecialModel.objects.find().execute().then(docs => {
 ### Validation & Extra Fields
 
 ```js
-const { Model, Fields } = require('@jsmrcaga/mongo');
+const { Model, Fields } = require('@jsmrcaga/executor');
 
 class Cat extends Model {
 	meow() {
@@ -91,7 +91,7 @@ class Cat extends Model {
 
 Cat.VALIDATION_SCHEMA = {
 	// Forces a name, and must be different from ''
-	name: Fields.String({ required: true, blank: false })
+	name: new Fields.String({ required: true, blank: false })
 };
 
 // Disabling extra fields means that we cannot create Cats
@@ -150,7 +150,7 @@ user.hard_delete();
 
 ## Queries
 
-Querying the DB becomes really easy with `@jsmrcaga/mongo`.
+Querying the DB becomes really easy with `@jsmrcaga/executor`.
 
 ### Accessing `mongodb` collections
 
@@ -165,7 +165,7 @@ from the driver.
 
 ```js
 MyModelClass.collection.findOne({ _id: 1234 }).then((doc) => {
-	console.assert((!doc instanceof MyModelClass));
+	console.assert(!(doc instanceof MyModelClass));
 });
 
 ```
@@ -211,7 +211,8 @@ Please note that this is a special `Queryset` method and not a `Manager` method,
 
 Every manager comes with a built-in `Queryset` instance that allows building aggregation pipelines.
 
-Using different methods you can build an aggregation pipeline and run it against your DB. Some methods are pre-writter
+Using different methods you can build an aggregation pipeline and run it against your DB. Some methods are pre-written, allowing
+you to simply pass the query and not the aggregation stage name.
 
 ### tl;dr
 
@@ -248,8 +249,9 @@ const queryset = User.objects.active().filter({
 // Will print all operations to be run
 queryset.explain();
 
-// Get normal aggregation cursor. Do this if you don't
-// return Model instances.
+// Get normal aggregation cursor. Do this if your 
+// aggregaton pipeline does not return Model instances.
+// Otherwise use done()
 const aggregation_cursor = queryset.run();
 
 // done() calls a specail Cursor proxy to instanciate objects
@@ -283,14 +285,17 @@ of binding your queries.
 
 ### `db.atomic()` API
 ```js
-const { Mongo } = require('@jsmrcaga/mongo');
+const { Mongo } = require('@jsmrcaga/executor');
 const my_db = Mongo.db();
 
 my_db.atomic(session => {
-	let s = { session };
+
 	return model.save({ session }).then(() => {
+
 		return model2.save({ session });
+
 	}).then(() => {
+
 		return model3.update({
 			name: 'new name'
 		}, { session });
@@ -301,7 +306,7 @@ my_db.atomic(session => {
 ### Transaction objects
 
 ```js
-const { Mongo } = require('@jsmrcaga/mongo');
+const { Mongo } = require('@jsmrcaga/executor');
 const my_db = Mongo.db();
 const transaction = my_db.transaction();
 

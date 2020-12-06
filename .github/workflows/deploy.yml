@@ -21,7 +21,7 @@ jobs:
         run: touch ~/.npmrc && echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN }}" > ~/.npmrc
 
       - name: Set version
-        run: npm version `echo ${{ github.event.release.tag_name }}` --git-tag-version=false
+        run: npm version `echo ${{ github.event.release.tag_name }}` --git-tag-version=false --allow-same-version
 
       - name: Deploy
         run: npm publish

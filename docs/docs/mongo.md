@@ -68,7 +68,7 @@ The class constructor takes any params listed above and calls `this.config()`,  
 This module is exported as a singleton. You can have access to the constructor by accessing it from the instance itself, but
 you won't usually need it.
 ```js
-const { Mongo } = require('@jsmrcaga/mongo');
+const { Mongo } = require('@jsmrcaga/executor');
 
 class MyOwnMongo extends Mongo.constructor {}
 ```
@@ -86,7 +86,7 @@ Takes any params listed in the signature and sets them in the instance.
 `connection` will be mapped to `connection_options`.
 
 ```js
-const { Mongo } = require('@jsmrcaga/mongo');
+const { Mongo } = require('@jsmrcaga/executor');
 Mongo.config({
 	url: 'this is my url',
 	options: {
@@ -103,7 +103,7 @@ If a `url` property has been defined, it will return that property. No checks ar
 If a `connection_options` object is provided in the instance, it will construct the `url` from it.
 
 ```js
-const { Mongo } = require('@jsmrcaga/mongo');
+const { Mongo } = require('@jsmrcaga/executor');
 Mongo.config({
 	url: 'this is my url'
 });
@@ -124,7 +124,7 @@ Calls `this.config()` setting any options provided in the `options` parameter be
 Attempts a connection to the MongoDB instance and returns a promise
 
 ```js
-const { Mongo } = require('@jsmrcaga/mongo');
+const { Mongo } = require('@jsmrcaga/executor');
 
 Mongo.connect({
 	connection: {
@@ -159,7 +159,7 @@ Returns a `Database` instance, which is a proxy for Mongo driver's [`Db`](https:
 If no name is provided _and_ a `database` property exists in the instance, that property is used instead.
 
 ```js
-const { Mongo } = require('@jsmrcaga/mongo');
+const { Mongo } = require('@jsmrcaga/executor');
 
 Mongo.connect().then(() => {
 	const db = Mongo.db('my_super_db');
