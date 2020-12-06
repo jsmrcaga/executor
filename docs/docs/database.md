@@ -15,7 +15,7 @@ It has some utility methods discussed below, but you should be able to call any 
 The `MongoClient` db instance recovered after a successful connection and calling `MongoClient.db()`.
 
 ### `mongo`
-An instance of [`Mongo`](http://localhost:3000/docs/reference/mongo).
+An instance of [`Mongo`](mongo).
 
 ## `Database#constructor`
 
@@ -26,10 +26,10 @@ new Database({ db, mongo });
 
 :::warning
 You won't usually need to instanciate the DB object yourself. This is done for you using the 
-[`Mongo.db()`](http://localhost:3000/docs/reference/mongo#db) method:
+[`Mongo.db()`](mongo#db) method:
 :::
 ```js
-const { Mongo } = require('@jsmrcaga/mongo');
+const { Mongo } = require('@jsmrcaga/executor');
 
 const db = Mongo.db();
 ```
@@ -80,4 +80,4 @@ db.atomic(session => {
 db.transaction();
 ````
 
-This method returns a new [`Transaction`](http://localhost:3000/docs/reference/transaction) instance. Please refer to [its documentation](http://localhost:3000/docs/reference/transaction).
+This method returns a new [`Transaction`](transaction) instance. Please refer to [its documentation](transaction).

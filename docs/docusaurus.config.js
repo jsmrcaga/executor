@@ -1,19 +1,23 @@
 module.exports = {
-  title: '@jsmrcaga/mongo',
+  title: 'Executor',
   tagline: 'A simple, 1-dependency, MongoDB ORM',
   url: 'https://your-docusaurus-test-site.com',
   baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
-  favicon: 'img/favicon.ico',
+  favicon: 'img/executor-logo.png',
   organizationName: 'Jo Colina', // Usually your GitHub org/user name.
-  projectName: '@jsmrcaga/mongo', // Usually your repo name.
+  projectName: '@jsmrcaga/executor', // Usually your repo name.
   themeConfig: {
+    colorMode: {
+      defaultMode: 'dark',
+      respectPrefersColorScheme: true,
+    },
     navbar: {
-      title: '@jsmrcaga/mongo',
+      title: '@jsmrcaga/executor',
       logo: {
-        alt: '@jsmrcaga/mongo',
-        src: 'img/logo.svg',
+        alt: '@jsmrcaga/executor',
+        src: 'img/executor-logo.png',
       },
       items: [
         {
