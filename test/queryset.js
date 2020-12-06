@@ -93,9 +93,10 @@ describe('Queryset', () => {
 			a_id: 123,
 			will_be_removed: 'test',
 			will_be_kept: 'lolilol',
-			sum_me: [1, 2, 3, 4, 5]
+			sum_me: [1, 2, 3, 4, 5],
+			string: 'plep'
 		});
-		let b2 = new ModelB({ _id: 543, c_id: ['c-slug-1', 'c-slug-2']});
+		let b2 = new ModelB({ _id: 543, c_id: ['c-slug-1', 'c-slug-2'], string: 'plep'});
 
 		let c1 = new CustomPk({ my_pk: 'c-slug-1' });
 		let c2 = new CustomPk({ my_pk: 'c-slug-2' });
