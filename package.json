@@ -1,6 +1,7 @@
 {
   "name": "@jsmrcaga/executor",
   "version": "2.0.0",
+  "private": false,
   "description": "Simple OR/DM for MongoDB",
   "main": "mongo.js",
   "scripts": {

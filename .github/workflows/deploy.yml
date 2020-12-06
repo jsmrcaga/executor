@@ -24,4 +24,4 @@ jobs:
         run: npm version `echo ${{ github.event.release.tag_name }}` --git-tag-version=false --allow-same-version
 
       - name: Deploy
-        run: npm publish
+        run: npm publish --access public
