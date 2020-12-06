@@ -1,16 +1,20 @@
 module.exports = {
   someSidebar: {
 	'tl;dr': ['tldr'],
+	Guide: [
+		'guide/validating-fields',
+		'guide/customizing-querysets'
+	],
 	Reference: [
-		'mongo',
-		'database',
-		'transaction',
-		'cursor',
-		'model',
-		'fields',
-		'manager',
-		'queryset',
-		'operation',
+		'reference/mongo',
+		'reference/database',
+		'reference/transaction',
+		'reference/cursor',
+		'reference/model',
+		'reference/fields',
+		'reference/manager',
+		'reference/queryset',
+		'reference/operation',
 	],
   },
 };

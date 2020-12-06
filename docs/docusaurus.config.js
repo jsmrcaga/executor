@@ -27,7 +27,7 @@ module.exports = {
           position: 'left',
         },
         {
-          href: 'https://github.com/facebook/docusaurus',
+          href: 'https://github.com/jsmrcaga/executor',
           label: 'GitHub',
           position: 'right',
         },
@@ -45,7 +45,7 @@ module.exports = {
           items: [
             {
               label: 'GitHub',
-              href: 'https://github.com/jsmrcaga/mmtb',
+              href: 'https://github.com/jsmrcaga/executor',
             },
             {
               label: 'Twitter',
