@@ -43,6 +43,10 @@ describe('Manager', () => {
 			expect(manager.get).to.not.be.undefined;
 		});
 
+		it('queryset - Returns an instance of Queryset', () => {
+			expect(manager.active()).to.be.an.instanceof(Queryset);
+		});
+
 		it('collection - Calls collection methods', () => {
 			expect(manager.findOne).to.not.be.undefined;
 			expect(manager.collectionName).to.be.eql('model');
