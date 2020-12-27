@@ -41,6 +41,30 @@ describe('Mongo Client', () => {
 		}).catch(e => done(e));
 	});
 
+	it('Connects (& disconnects) to mongo instance using config with connection_options', done => {
+		const mongo = new Mongo.constructor();
+		mongo.config({
+			connection: {
+				protocol: 'mongodb',
+				host: 'db',
+				port: 27017,
+				database: 'mongo',
+				query: {
+					authSource: 'admin'
+				}
+			},
+			options: {
+				useUnifiedTopology: true
+			}
+		});
+		mongo.connect().then(() => {
+			expect(mongo.client.isConnected()).to.be.eql(true);
+			return mongo.disconnect();
+		}).then(() => {
+			done();
+		}).catch(e => done(e));
+	});
+
 	it('Connects (& disconnects) to mongo instance from connect method', done => {
 		const mongo = new Mongo.constructor();
 		mongo.connect(connection_config).then(() => {
