@@ -54,11 +54,14 @@ describe('Models', () => {
 
 		it('create - Instanciates a model without verifying data', () => {
 			const generic_instance = Model.create({ poulet: 25 });
-			const test_instance = MyTestModel.create({ plep: 42 });
+			const test_instance = MyTestModel.create({ plep: 42, poulet: 'my-poulet-key' });
 
 			expect(generic_instance).to.be.an.instanceof(Model);
+			expect(generic_instance.poulet).to.be.eql(25);
 			expect(test_instance).to.be.an.instanceof(MyTestModel);
 			expect(test_instance).to.be.an.instanceof(Model);
+			expect(test_instance.plep).to.be.eql(42);
+			expect(test_instance.poulet).to.be.eql('my-poulet-key');
 		});
 	});
 
@@ -70,6 +73,28 @@ describe('Models', () => {
 			for(let [k, v] of Object.entries(parsed)) {
 				expect(v).to.be.eql(model[k]);
 			}
+		});
+
+		it('Retrieves a model with PK', done => {
+			let model = new MyTestModel({ test: 'chicken' });
+			expect(model.poulet).to.not.be.undefined;
+			const pk = model.pk;
+			const created = model.__created;
+
+			model.save().then(() => {
+				return MyTestModel.objects.get({ test: 'chicken' });
+			}).then(newModel => {
+				expect(newModel.poulet).to.be.eql(pk);
+				expect(newModel.pk).to.be.eql(pk);
+				expect(newModel.__updated).to.be.eql(null);
+				expect(newModel.__created).to.be.eql(created);
+				return MyTestModel.objects.find({ test: 'chicken' }).execute();
+			}).then(([newModel]) => {
+				expect(newModel.poulet).to.be.eql(pk);
+				expect(newModel.pk).to.be.eql(pk);
+				expect(newModel.__created).to.be.eql(created);
+				done();
+			}).catch(e => done(e));
 		});
 	});
 
@@ -117,7 +142,7 @@ describe('Models', () => {
 		describe('Update', () => {
 			let model = null;
 			beforeEach(done => {
-				let test = new MyTestModel({ plep: 45 });
+				let test = new MyTestModel({ plep: 45, existing_value: 'my-value' });
 				test.save().then(() => {
 					model = test;
 					done();
@@ -146,6 +171,20 @@ describe('Models', () => {
 					});
 				}).then(doc => {
 					expect(doc.extra).to.be.eql(567);
+					done()
+				}).catch(e => {
+					done(e);
+				});
+			});
+
+			it('update - Updates an existing value', done => {
+				model.existing_value = 'another value';
+				model.update().then(() => {
+					return MyTestModel.objects.findOne({
+						_id: model._id
+					});
+				}).then(doc => {
+					expect(doc.existing_value).to.be.eql('another value');
 					done()
 				}).catch(e => {
 					done(e);
