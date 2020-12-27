@@ -10,51 +10,79 @@ describe('Mongo Client', () => {
 		},
 		database: 'mongo'
 	};
+
+	it('Builds URL from config options', () => {
+		const mongo = new Mongo.constructor();
+		mongo.config({
+			connection: {
+				host: 'host',
+				database: 'db',
+				protocol: 'mongodb',
+				port: 1234,
+				username: 'username',
+				password: 'password',
+				query: {
+					direct: true
+				}
+			}
+		});
+
+		expect(mongo.get_connection_url()).to.be.eql('mongodb://username:password@host:1234/db?direct=true');
+	});
+
 	it('Connects (& disconnects) to mongo instance using config', done => {
-		Mongo.config(connection_config);
-		Mongo.connect().then(() => {
-			expect(Mongo.client.isConnected()).to.be.eql(true);
-			return Mongo.disconnect();
+		const mongo = new Mongo.constructor();
+		mongo.config(connection_config);
+		mongo.connect().then(() => {
+			expect(mongo.client.isConnected()).to.be.eql(true);
+			return mongo.disconnect();
 		}).then(() => {
 			done();
 		}).catch(e => done(e));
 	});
 
 	it('Connects (& disconnects) to mongo instance from connect method', done => {
-		Mongo.connect(connection_config).then(() => {
-			expect(Mongo.client.isConnected()).to.be.eql(true);
-			return Mongo.disconnect();
+		const mongo = new Mongo.constructor();
+		mongo.connect(connection_config).then(() => {
+			expect(mongo.client.isConnected()).to.be.eql(true);
+			return mongo.disconnect();
 		}).then(() => {
 			done();
 		}).catch(e => done(e));
 	});
 
-	it('Can call MongoClient params directly', () => {
-		expect(Mongo.isConnected()).to.be.eql(false);
-		expect(Mongo.watch).to.not.be.undefined;
+	it('Can call MongoClient params directly once connected', done => {
+		const mongo = new Mongo.constructor();
+		mongo.connect(connection_config).then(() => {
+			expect(mongo.isConnected()).to.be.eql(true);
+			expect(mongo.watch).to.not.be.undefined;
+			done();
+		}).catch(e => done(e));
 	});
 
 	it('Returns a database from config name', done => {
-		Mongo.connect(connection_config).then(() => {
-			let db = Mongo.db();
+		const mongo = new Mongo.constructor();
+		mongo.connect(connection_config).then(() => {
+			let db = mongo.db();
 			expect(db).to.be.an.instanceof(Database);
 			return db.stats();
 		}).then(({ db }) => {
 			expect(db).to.be.eql(connection_config.database);
-			return Mongo.disconnect();
+			return mongo.disconnect();
 		}).then(() => {
 			done();
 		}).catch(e => done(e));
 	});
 
 	it('Returns a database called poulet', done => {
-		Mongo.connect(connection_config).then(() => {
-			let db = Mongo.db('poulet');
+		const mongo = new Mongo.constructor();
+		mongo.connect(connection_config).then(() => {
+			let db = mongo.db('poulet');
 			expect(db).to.be.an.instanceof(Database);
 			return db.stats();
 		}).then(({ db }) => {
 			expect(db).to.be.eql('poulet');
-			return Mongo.disconnect();
+			return mongo.disconnect();
 		}).then(() => {
 			done();
 		}).catch(e => done(e));
