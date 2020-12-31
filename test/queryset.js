@@ -61,7 +61,9 @@ describe('Queryset', () => {
 				done();
 			}).catch(e => done(e));
 		});
+	});
 
+	describe('Get single object', () => {
 		it('get - Gets a single doc and instanciates it', done => {
 			let model = new MySuperModel({ plep: 145 });
 			model.save().then(() => {
@@ -74,6 +76,70 @@ describe('Queryset', () => {
 				expect(doc.plep).to.be.eql(145);
 				done();
 			}).catch(e => done(e));
+		});
+
+		it('get - Gets a single doc from previous filterset and instanciates it', done => {
+			let model = new MySuperModel({ plep: 145 });
+			model.save().then(() => {
+				return queryset.filter({
+					plep: 145
+				}).get();
+			}).then(doc => {
+				expect(doc).to.be.an.instanceof(MySuperModel);
+				expect(doc._id).to.not.be.undefined;
+				expect(doc.plep).to.be.eql(145);
+				done();
+			}).catch(e => done(e));
+		});
+
+		it('get - Gets a single doc from previous filterset and adds new filters', done => {
+			let model = new MySuperModel({ plep: 145, plop: 1 });
+			let model2 = new MySuperModel({ plep: 145, plop: 2 });
+			Promise.all([model.save(), model2.save()]).then(() => {
+				return queryset.filter({
+					plep: 145
+				}).get({
+					plop:1
+				});
+			}).then(doc => {
+				expect(doc).to.be.an.instanceof(MySuperModel);
+				expect(doc._id).to.not.be.undefined;
+				expect(doc.plep).to.be.eql(145);
+				expect(doc.plop).to.be.eql(1);
+				done();
+			}).catch(e => done(e));
+		});
+
+		it('get - Throws if no objects match ', done => {
+			let model = new MySuperModel({ plep: 145, plop: 1 });
+			let model2 = new MySuperModel({ plep: 145, plop: 2 });
+			Promise.all([model.save(), model2.save()]).then(() => {
+				return queryset.filter({
+					plep: 145
+				}).get({
+					plop:5
+				});
+			}).then(doc => {
+				done(new Error('Should not resolve'));
+			}).catch(e => {
+				expect(/No document/.test(e.message)).to.be.true;
+				done();
+			});
+		});
+
+		it('get - Throws if many objects match ', done => {
+			let model = new MySuperModel({ plep: 145, plop: 1 });
+			let model2 = new MySuperModel({ plep: 145, plop: 2 });
+			Promise.all([model.save(), model2.save()]).then(() => {
+				return queryset.filter({
+					plep: 145
+				}).get();
+			}).then(doc => {
+				done(new Error('Should not resolve'));
+			}).catch(e => {
+				expect(/More than/.test(e.message)).to.be.true;
+				done();
+			});
 		});
 
 		it('bulk_update - Not implemented');
