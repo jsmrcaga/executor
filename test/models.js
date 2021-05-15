@@ -1,7 +1,7 @@
 const { Collection } = require('mongodb');
 const { expect } = require('chai');
 const Model = require('../lib/models/model');
-const { PrimaryKey } = require('../lib/models/fields');
+const Fields = require('../lib/models/fields');
 const Manager = require('../lib/models/manager');
 
 const Database = require('../lib/database');
@@ -11,7 +11,7 @@ const fixtures = require('./fixtures');
 // Test class
 class MyTestModel extends Model {}
 MyTestModel.VALIDATION_SCHEMA = {
-	poulet: new PrimaryKey({
+	poulet: new Fields.PrimaryKey({
 		defaultValue: () => Math.floor(Math.random() * 0x100000).toString(16)
 	})
 };
@@ -46,7 +46,7 @@ describe('Models', () => {
 			const [test_pk, test_pk_field] = MyTestModel.pk;
 
 			expect(generic_pk_field).to.be.null;
-			expect(test_pk_field).to.be.an.instanceof(PrimaryKey);
+			expect(test_pk_field).to.be.an.instanceof(Fields.PrimaryKey);
 
 			expect(generic_pk).to.be.eql('_id');
 			expect(test_pk).to.be.eql('poulet');
@@ -95,6 +95,27 @@ describe('Models', () => {
 				expect(newModel.__created).to.be.eql(created);
 				done();
 			}).catch(e => done(e));
+		});
+
+		it('Instanciates a model with default values', () => {
+			class Model2 extends Model {}
+			Model2.VALIDATION_SCHEMA = {
+				primary: new Fields.PrimaryKey({
+					defaultValue: () => Math.floor(Math.random() * 0x100000).toString(16)
+				}),
+				str: new Fields.String({
+					defaultValue: 'plp'
+				}),
+				nb: new Fields.PositiveInteger({
+					defaultValue: () => 54
+				}),
+				noop: new Fields.String()
+			};
+
+			const model = new Model2();
+			expect(model.pk).not.to.be.null;
+			expect(model.str).to.be.eql('plp');
+			expect(model.nb).to.be.eql(54);
 		});
 	});
 

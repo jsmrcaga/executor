@@ -163,6 +163,8 @@ describe('Queryset', () => {
 			string: 'plep'
 		});
 		let b2 = new ModelB({ _id: 543, c_id: ['c-slug-1', 'c-slug-2'], string: 'plep'});
+		let b3 = new ModelB({ _id: 555, c_id: ['c-slug-1', 'c-slug-2'], a_id: 123, string: 'plep'});
+		let b4 = new ModelB({ _id: 666, c_id: ['c-slug-1', 'c-slug-2'], a_id: null, string: 'plep'});
 
 		let c1 = new CustomPk({ my_pk: 'c-slug-1' });
 		let c2 = new CustomPk({ my_pk: 'c-slug-2' });
@@ -175,7 +177,7 @@ describe('Queryset', () => {
 			let promises = [
 				connection.db.clear(),
 				querysetA.bulk_insert([a1, a2, a3]),
-				querysetB.bulk_insert([b1, b2]),
+				querysetB.bulk_insert([b1, b2, b3, b4]),
 				querysetC.bulk_insert([c1, c2])
 			];
 
@@ -333,6 +335,49 @@ describe('Queryset', () => {
 					expect(Array.isArray(doc.c)).to.be.true;
 					expect(doc.c.length).to.be.gt(0);
 					expect(doc.c.every(c => c instanceof CustomPk)).to.be.true;
+					done();
+				}).catch(e => done(e));
+			});
+
+			it('select_related - Gets multiple select related values chaining select_related', done => {
+				let qs = querysetB.filter({ _id: 555 }).select_related('a').select_related('c');
+				qs.done().then(docs => {
+					expect(docs.length).to.be.eql(1);
+					const [doc] = docs;
+
+					expect(doc).to.be.an.instanceof(ModelB);
+					expect(Array.isArray(doc.c_id)).to.be.true;
+					expect(Array.isArray(doc.c)).to.be.true;
+					expect(doc.c.every(c => c instanceof CustomPk)).to.be.true;
+					expect(doc.a instanceof ModelA).to.be.true;
+					done();
+				}).catch(e => done(e));
+			});
+
+			it('select_related - Gets multiple select related values with one call', done => {
+				let qs = querysetB.filter({ _id: 555 }).select_related('a', 'c');
+				qs.done().then(docs => {
+					expect(docs.length).to.be.eql(1);
+					const [doc] = docs;
+
+					expect(doc).to.be.an.instanceof(ModelB);
+					expect(Array.isArray(doc.c_id)).to.be.true;
+					expect(Array.isArray(doc.c)).to.be.true;
+					expect(doc.c.every(c => c instanceof CustomPk)).to.be.true;
+					expect(doc.a instanceof ModelA).to.be.true;
+					done();
+				}).catch(e => done(e));
+			});
+
+			it('select_related - Understands null values', done => {
+				let qs = querysetB.filter({ _id: 666 }).select_related('a');
+				qs.done().then(docs => {
+					expect(docs.length).to.be.eql(1);
+					const [doc] = docs;
+
+					expect(doc).to.be.an.instanceof(ModelB);
+					expect(doc.a_id).to.be.null;
+					expect(doc.a).to.be.null;
 					done();
 				}).catch(e => done(e));
 			});
