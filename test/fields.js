@@ -7,9 +7,8 @@ const fixtures = require('./fixtures');
 
 // Setup
 class NeverValidatesField extends Fields.GenericField {
-	constructor({ value, ...params }) {
+	constructor(params) {
 		super(params);
-		this.value = value;
 	}
 
 	validate() {
@@ -37,14 +36,14 @@ describe('Fields', () => {
 		});
 
 		it('is_valid - Validates using valid() & throws', () => {
-			let string_field = new NeverValidatesField({ value: 'My error' });
-			let false_field = new NeverValidatesField({ value: false });
+			let string_field = new NeverValidatesField({ required: true });
+			let false_field = new NeverValidatesField({ required: true });
 
-			expect(() => string_field.is_valid()).to.throw(Error);
-			expect(() => string_field.is_valid()).to.throw(Error, 'My error');
+			expect(() => string_field.is_valid('My error')).to.throw(Error);
+			expect(() => string_field.is_valid('My error')).to.throw(Error, 'My error');
 
-			expect(() => false_field.is_valid()).to.throw(Error);
-			expect(() => false_field.is_valid()).to.throw(Error, 'Invalid value');
+			expect(() => false_field.is_valid(false)).to.throw(Error);
+			expect(() => false_field.is_valid(false)).to.throw(Error, 'Invalid value');
 		});
 
 		it('get_default - Gets a default value (func / value)', () => {
