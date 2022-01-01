@@ -89,6 +89,15 @@ describe('Fields', () => {
 			expect(field.cast(5.123456789)).to.be.eql('5.123456789');
 			expect(field.cast({})).to.be.eql('[object Object]');
 		});
+
+		it('Validates choice fields', () => {
+			const field = new Fields.String({ blank: true, choices: ['plep', 'plop'] });
+			// We have blank allowed
+			expect(field.validate('')).to.be.true;
+			expect(field.validate('plep')).to.be.true;
+			expect(field.validate('plop')).to.be.true;
+			expect(() => field.validate('plip')).to.throw(Error);
+		});
 	});
 
 	describe('Numbers', () => {
@@ -228,6 +237,62 @@ describe('Fields', () => {
 			expect(field.validate([4, 6, 8, 10])).to.be.true;
 			expect(() => field.validate([4, 6, 8, 10, 11, 12, 18])).to.throw(Error);
 		});
+	});
+
+	describe('Date field', () => {
+		for(const date of [
+			'',
+			'plep',
+			'2021-06-07 121:12',
+			'2021-06-07 121:12:12',
+			'2021-13-13'
+		]) {
+			it(`Does not validate invalid dates - ${date}`, () => {
+				const field = new Fields.DateTime();
+				expect(() => field.validate(date)).to.throw(Error);
+			});
+		}
+
+		for(const date of [
+			'123', // somehow this is considered a valid year
+			'2022-01-01T19:51:34.551Z',
+			new Date(),
+			'2021-06-07',
+			'2021-06-07 13:05:05',
+		]) {
+			it(`Validates both date objects and iso/valid strings - ${date}`, () => {
+				const field = new Fields.DateTime();
+				expect(field.validate(date)).to.be.true;
+			});
+		}
+	});
+
+	describe('Choice field', () => {
+		for(const date of [
+			'',
+			'plep',
+			'2021-06-07 121:12',
+			'2021-06-07 121:12:12',
+			'2021-13-13'
+		]) {
+			it(`Does not validate invalid dates - ${date}`, () => {
+				const field = new Fields.DateTime();
+				expect(() => field.validate(date)).to.throw(Error);
+			});
+		}
+
+		for(const date of [
+			'123', // somehow this is considered a valid year
+			'2022-01-01T19:51:34.551Z',
+			new Date(),
+			'2021-06-07',
+			'2021-06-07 13:05:05',
+		]) {
+			it(`Validates both date objects and iso/valid strings - ${date}`, () => {
+				const field = new Fields.DateTime();
+				expect(field.validate(date)).to.be.true;
+			});
+		}
 	});
 
 	describe('Foreign Keys', () => {
