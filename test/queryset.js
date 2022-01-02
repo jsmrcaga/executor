@@ -573,12 +573,12 @@ describe('Queryset', () => {
 			it('sort - Should add a sort operation to the pipeline', () => {
 				let { pipeline } = querysetA.sort({
 					group: -1,
-					sort: 1					
+					sort: 1
 				});
 				expect(pipeline[0].definition()).to.be.eql({
 					$sort: {
 						group: -1,
-						sort: 1					
+						sort: 1
 					}
 				});
 			});
@@ -590,6 +590,112 @@ describe('Queryset', () => {
 					let ids = [a1, a2, a3].sort((a, b) => a.sort - b.sort).map(el => el._id);
 					let docs_ids = docs.map(el => el._id);
 					expect(docs_ids).to.be.eql(ids);
+					done();
+				}).catch(e => done(e));
+			});
+		});
+
+		describe('Update', () => {
+			it('Should update multiple objects', done => {
+				let a1 = new ModelA({ _id: 1111, group: 'a', sort: 6 });
+				let a2 = new ModelA({ _id: 2222, model_b_id: 321, group: 'a', sort: 3 });
+				let a3 = new ModelA({ _id: 3333, model_b_id: 321, group: 'b', sort: 1 });
+
+				const insertion = new Queryset({ Model: ModelA });
+
+				const queryset = new Queryset({ Model: ModelA });
+
+				insertion.bulk_insert([a1, a2, a3]).then(() => {
+					return queryset.filter({
+						_id: {
+							$in: [1111, 2222]
+						}
+					}).update({
+						group: 'test'
+					});
+				}).then(() => {
+					const qs = new Queryset({ Model: ModelA });
+					return qs.filter({
+						_id: {
+							$in: [1111, 2222]
+						}
+					}).done();
+				}).then(as => {
+					for(const a of as) {
+						expect(a.group).to.be.eql('test');
+					}
+					const qs2 = new Queryset({ Model: ModelA });
+					return qs2.get({ _id: 3333 });
+				}).then(a3 => {
+					expect(a3.group).to.be.eql('b');
+					done();
+				}).catch(e => done(e));
+			});
+
+			it('Should delete multiple objects', done => {
+				let a1 = new ModelA({ _id: 1111, group: 'a', sort: 6 });
+				let a2 = new ModelA({ _id: 2222, model_b_id: 321, group: 'a', sort: 3 });
+				let a3 = new ModelA({ _id: 3333, model_b_id: 321, group: 'b', sort: 1 });
+
+				const insertion = new Queryset({ Model: ModelA });
+
+				const queryset = new Queryset({ Model: ModelA });
+
+				insertion.bulk_insert([a1, a2, a3]).then(() => {
+					return queryset.filter({
+						_id: {
+							$in: [1111, 2222]
+						}
+					}).delete();
+				}).then(() => {
+					const qs = new Queryset({ Model: ModelA });
+					return qs.filter({
+						_id: {
+							$in: [1111, 2222]
+						}
+					}).done();
+				}).then(as => {
+					for(const a of as) {
+						expect(a.__deleted).to.not.be.null;
+					}
+					const qs2 = new Queryset({ Model: ModelA });
+					return qs2.get({ _id: 3333 });
+				}).then(a3 => {
+					expect(a3.__deleted).to.be.null;
+					done();
+				}).catch(e => done(e));
+			});
+
+			it('Should hard delete multiple objects', done => {
+				let a1 = new ModelA({ _id: 1111, group: 'a', sort: 6 });
+				let a2 = new ModelA({ _id: 2222, model_b_id: 321, group: 'a', sort: 3 });
+				let a3 = new ModelA({ _id: 3333, model_b_id: 321, group: 'b', sort: 1 });
+
+				const insertion = new Queryset({ Model: ModelA });
+
+				const queryset = new Queryset({ Model: ModelA });
+
+				insertion.bulk_insert([a1, a2, a3]).then(() => {
+					return queryset.filter({
+						_id: {
+							$in: [1111, 2222]
+						}
+					}).hard_delete();
+				}).then(() => {
+					const qs = new Queryset({ Model: ModelA });
+					return qs.filter({
+						_id: {
+							$in: [1111, 2222]
+						}
+					}).done();
+				}).then(as => {
+					expect(as).to.have.length(0);
+
+					const qs2 = new Queryset({ Model: ModelA });
+					return qs2.get({ _id: 3333 });
+				}).then(a3 => {
+					expect(a3).to.not.be.null;
+					expect(a3).to.not.be.undefined;
 					done();
 				}).catch(e => done(e));
 			});
