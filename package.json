@@ -19,7 +19,7 @@
     "nyc": "^13.3.0"
   },
   "dependencies": {
-    "mongodb": "^3.6.3"
+    "mongodb": "^4.3.0"
   },
   "repository": {
     "type": "git",
