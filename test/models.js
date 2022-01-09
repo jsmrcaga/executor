@@ -418,7 +418,7 @@ describe('Models', () => {
 			TestModel.VALIDATION_SCHEMA = {
 				test_field: new Fields.String({ defaultValue: () => 'functional vlaue' }),
 				test_field_auto: new Fields.Number({ defaultValue: 54 }),
-				default_empty_string: new Fields.String({ defaultValue: '' }),
+				default_empty_string: new Fields.String({ defaultValue: '', blank: true }),
 				default_zero: new Fields.Number({ defaultValue: 0 }),
 				default_null: new Fields.Number({ nullable: true, defaultValue: null }),
 				default_false: new Fields.Boolean({ nullable: true, defaultValue: false }),
