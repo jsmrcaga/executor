@@ -371,7 +371,6 @@ describe('Models', () => {
 					transaction.add(test2.save.bind(test2), { checkKeys: true });
 
 					transaction.commit().then(result => {
-						console.log('Result', result);
 						return MyTestModel.objects.get({ plep: 45 });
 					}).then(doc => {
 						expect(doc).not.to.be.undefined;
@@ -433,6 +432,162 @@ describe('Models', () => {
 			expect(model.default_zero).to.be.eql(0);
 			expect(model.default_null).to.be.eql(null);
 			expect(model.default_false).to.be.eql(false);
+		});
+
+		it('Should store a direct foreign key with _id from instance', done => {
+			class FKModel extends Model {}
+			FKModel.VALIDATION_SCHEMA = {
+				plep: new Fields.PrimaryKey({ defaultValue: () => Math.random() }),
+			};
+
+			class TestModel extends Model {}
+			TestModel.VALIDATION_SCHEMA = {
+				mm: new Fields.ForeignKey({ Model: FKModel, nullable: false })
+			};
+
+			// With instance
+			const fk = new FKModel();
+			const t_m = new TestModel({
+				mm: fk
+			});
+			fk.save().then(() => {
+				return t_m.save();
+			}).then(() => {
+				return TestModel.objects.filter().done();
+			}).then(([test_model]) => {
+				expect(test_model.mm_id).to.be.eql(fk.pk);
+				return TestModel.objects.all().select_related('mm').done();
+			}).then(([test_model]) => {
+				expect(test_model.mm).to.be.instanceof(FKModel);
+				expect(test_model.mm.pk).to.be.eql(fk.pk);
+				expect(test_model.mm_id).to.be.eql(fk.pk);
+				done();
+			}).catch(e => {
+				done(e);
+			});
+		});
+
+		it('Should store a direct foreign key with key_id with direct pk', done => {
+			class FKModel extends Model {}
+			FKModel.VALIDATION_SCHEMA = {
+				plep: new Fields.PrimaryKey({ defaultValue: () => Math.random() }),
+			};
+
+			class TestModel extends Model {}
+			TestModel.VALIDATION_SCHEMA = {
+				mm: new Fields.ForeignKey({ Model: FKModel, nullable: false })
+			};
+
+			// With instance
+			const fk = new FKModel();
+			const t_m = new TestModel({
+				// works because PK is precalculated
+				mm_id: fk.pk
+			});
+
+			fk.save().then(() => {
+				return t_m.save();
+			}).then(() => {
+				return TestModel.objects.filter().done();
+			}).then(([test_model]) => {
+				expect(test_model.mm_id).to.be.eql(fk.pk);
+				return TestModel.objects.all().select_related('mm').done();
+			}).then(([test_model]) => {
+				expect(test_model.mm).to.be.instanceof(FKModel);
+				expect(test_model.mm.pk).to.be.eql(fk.pk);
+				expect(test_model.mm_id).to.be.eql(fk.pk);
+				done();
+			}).catch(e => {
+				done(e);
+			});
+		});
+
+		it('Should store foreign keys in array and be able to get objects back', done => {
+			class FKModel extends Model {}
+			FKModel.VALIDATION_SCHEMA = {
+				plep: new Fields.PrimaryKey({ defaultValue: () => Math.random() }),
+			};
+
+			class TestModel extends Model {}
+			TestModel.VALIDATION_SCHEMA = {
+				mm: new Fields.ForeignKey({ many: true, Model: FKModel, nullable: false })
+			};
+
+			// With instance
+			const fk = new FKModel();
+			const fk2 = new FKModel();
+
+			const t_m = new TestModel({
+				mm: [fk, fk2]
+			});
+
+			const db_form = t_m.toDataBase();
+			expect(db_form).to.have.property('mm_ids');
+			expect(db_form.mm_ids.every(item => !(item instanceof Object))).to.be.true;
+
+			Promise.all([fk.save(), fk2.save()]).then(() => {
+				return t_m.save();
+			}).then(() => {
+				return TestModel.objects.filter().done();
+			}).then(([test_model]) => {
+				expect(Array.isArray(test_model.mm_ids)).to.be.true;
+				expect(test_model.mm_ids[0]).to.be.eql(fk.pk);
+				expect(test_model.mm_ids[1]).to.be.eql(fk2.pk);
+				return TestModel.objects.all().select_related('mm').done();
+			}).then(([test_model]) => {
+				expect(Array.isArray(test_model.mm)).to.be.true;
+				expect(test_model.mm[0]).to.be.instanceof(FKModel);
+				expect(test_model.mm[1]).to.be.instanceof(FKModel);
+				expect(test_model.mm[0].pk).to.be.eql(fk.pk);
+				expect(test_model.mm[1].pk).to.be.eql(fk2.pk);
+				done();
+			}).catch(e => {
+				done(e);
+			});
+		});
+
+		it('Should store foreign keys in array from instances', done => {
+			class FKModel extends Model {}
+			FKModel.VALIDATION_SCHEMA = {
+				plep: new Fields.PrimaryKey({ defaultValue: () => Math.random() }),
+			};
+
+			class TestModel extends Model {}
+			TestModel.VALIDATION_SCHEMA = {
+				mm: new Fields.ForeignKey({ many: true, Model: FKModel, nullable: false })
+			};
+
+			// With instance
+			const fk = new FKModel();
+			const fk2 = new FKModel();
+
+			const t_m = new TestModel({
+				mm: [fk, fk2]
+			});
+
+			const db_form = t_m.toDataBase();
+			expect(db_form).to.have.property('mm_ids');
+			expect(db_form.mm_ids.every(item => !(item instanceof Object))).to.be.true;
+
+			Promise.all([fk.save(), fk2.save()]).then(() => {
+				return t_m.save();
+			}).then(() => {
+				return TestModel.objects.filter().done();
+			}).then(([test_model]) => {
+				expect(Array.isArray(test_model.mm_ids)).to.be.true;
+				expect(test_model.mm_ids[0]).to.be.eql(fk.pk);
+				expect(test_model.mm_ids[1]).to.be.eql(fk2.pk);
+				return TestModel.objects.all().select_related('mm').done();
+			}).then(([test_model]) => {
+				expect(Array.isArray(test_model.mm)).to.be.true;
+				expect(test_model.mm[0]).to.be.instanceof(FKModel);
+				expect(test_model.mm[1]).to.be.instanceof(FKModel);
+				expect(test_model.mm[0].pk).to.be.eql(fk.pk);
+				expect(test_model.mm[1].pk).to.be.eql(fk2.pk);
+				done();
+			}).catch(e => {
+				done(e);
+			});
 		});
 	})
 });

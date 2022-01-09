@@ -20,7 +20,7 @@ class ModelB extends Model {}
 ModelB.VALIDATION_SCHEMA = {
 	string: new Fields.String(),
 	a: new Fields.ForeignKey({ Model: ModelA }),
-	c: new Fields.ForeignKey({ Model: CustomPk, many: true }),
+	c: new Fields.ForeignKey({ Model: CustomPk, many: true, nullable: true }),
 };
 
 describe('Queryset', () => {
@@ -162,9 +162,9 @@ describe('Queryset', () => {
 			sum_me: [1, 2, 3, 4, 5],
 			string: 'plep'
 		});
-		let b2 = new ModelB({ _id: 543, c_id: ['c-slug-1', 'c-slug-2'], string: 'plep'});
-		let b3 = new ModelB({ _id: 555, c_id: ['c-slug-1', 'c-slug-2'], a_id: 123, string: 'plep'});
-		let b4 = new ModelB({ _id: 666, c_id: ['c-slug-1', 'c-slug-2'], a_id: null, string: 'plep'});
+		let b2 = new ModelB({ _id: 543, c_ids: ['c-slug-1', 'c-slug-2'], string: 'plep'});
+		let b3 = new ModelB({ _id: 555, c_ids: ['c-slug-1', 'c-slug-2'], a_id: 123, string: 'plep'});
+		let b4 = new ModelB({ _id: 666, c_ids: ['c-slug-1', 'c-slug-2'], a_id: null, string: 'plep'});
 
 		let c1 = new CustomPk({ my_pk: 'c-slug-1' });
 		let c2 = new CustomPk({ my_pk: 'c-slug-2' });
@@ -319,7 +319,7 @@ describe('Queryset', () => {
 					$lookup: {
 						as: 'c',
 						from: 'custom-pk',
-						localField: 'c_id',
+						localField: 'c_ids',
 						foreignField: 'my_pk'
 					}
 				});
@@ -331,8 +331,8 @@ describe('Queryset', () => {
 					expect(docs.length).to.be.eql(1);
 					let [doc] = docs;
 					expect(doc).to.be.an.instanceof(ModelB);
-					expect(Array.isArray(doc.c_id)).to.be.true;
 					expect(Array.isArray(doc.c)).to.be.true;
+					expect(Array.isArray(doc.c_ids)).to.be.true;
 					expect(doc.c.length).to.be.gt(0);
 					expect(doc.c.every(c => c instanceof CustomPk)).to.be.true;
 					done();
@@ -346,7 +346,7 @@ describe('Queryset', () => {
 					const [doc] = docs;
 
 					expect(doc).to.be.an.instanceof(ModelB);
-					expect(Array.isArray(doc.c_id)).to.be.true;
+					expect(Array.isArray(doc.c_ids)).to.be.true;
 					expect(Array.isArray(doc.c)).to.be.true;
 					expect(doc.c.every(c => c instanceof CustomPk)).to.be.true;
 					expect(doc.a instanceof ModelA).to.be.true;
@@ -361,7 +361,7 @@ describe('Queryset', () => {
 					const [doc] = docs;
 
 					expect(doc).to.be.an.instanceof(ModelB);
-					expect(Array.isArray(doc.c_id)).to.be.true;
+					expect(Array.isArray(doc.c_ids)).to.be.true;
 					expect(Array.isArray(doc.c)).to.be.true;
 					expect(doc.c.every(c => c instanceof CustomPk)).to.be.true;
 					expect(doc.a instanceof ModelA).to.be.true;
