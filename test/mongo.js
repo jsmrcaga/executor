@@ -4,7 +4,7 @@ const { expect } = require('chai');
 
 describe('Mongo Client', () => {
 	const connection_config = {
-		url: `mongodb://db:27017/mongo?authSource=admin`,
+		url: `mongodb://db:27017/mongo`,
 		options: {
 			useUnifiedTopology: true
 		},
@@ -34,7 +34,6 @@ describe('Mongo Client', () => {
 		const mongo = new Mongo.constructor();
 		mongo.config(connection_config);
 		mongo.connect().then(() => {
-			expect(mongo.client.isConnected()).to.be.eql(true);
 			return mongo.disconnect();
 		}).then(() => {
 			done();
@@ -49,16 +48,12 @@ describe('Mongo Client', () => {
 				host: 'db',
 				port: 27017,
 				database: 'mongo',
-				query: {
-					authSource: 'admin'
-				}
 			},
 			options: {
 				useUnifiedTopology: true
 			}
 		});
 		mongo.connect().then(() => {
-			expect(mongo.client.isConnected()).to.be.eql(true);
 			return mongo.disconnect();
 		}).then(() => {
 			done();
@@ -68,7 +63,6 @@ describe('Mongo Client', () => {
 	it('Connects (& disconnects) to mongo instance from connect method', done => {
 		const mongo = new Mongo.constructor();
 		mongo.connect(connection_config).then(() => {
-			expect(mongo.client.isConnected()).to.be.eql(true);
 			return mongo.disconnect();
 		}).then(() => {
 			done();
@@ -78,7 +72,6 @@ describe('Mongo Client', () => {
 	it('Can call MongoClient params directly once connected', done => {
 		const mongo = new Mongo.constructor();
 		mongo.connect(connection_config).then(() => {
-			expect(mongo.isConnected()).to.be.eql(true);
 			expect(mongo.watch).to.not.be.undefined;
 			done();
 		}).catch(e => done(e));

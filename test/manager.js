@@ -5,6 +5,8 @@ const Manager = require('../lib/models/manager');
 const Queryset = require('../lib/models/queryset');
 const Cursor = require('../lib/models/cursor');
 
+const fixtures = require('./fixtures');
+
 class MyModel extends Model {}
 
 class CustomManager extends Manager {}
@@ -19,6 +21,8 @@ class MyCustomManagerModel extends Model {
 }
 
 describe('Manager', () => {
+	fixtures.connect();
+
 	it('constructor - Cannot be instanciated without a Model', done => {
 		try {
 			let m = new Manager();

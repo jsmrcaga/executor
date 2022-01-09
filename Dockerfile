@@ -1,5 +1,5 @@
 # Dynamic versions to enable test matrix
-ARG VERSION=15
+ARG VERSION=16
 FROM node:${VERSION}-alpine
 
 # Code folder inside Docker
