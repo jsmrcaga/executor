@@ -419,12 +419,20 @@ describe('Models', () => {
 			TestModel.VALIDATION_SCHEMA = {
 				test_field: new Fields.String({ defaultValue: () => 'functional vlaue' }),
 				test_field_auto: new Fields.Number({ defaultValue: 54 }),
+				default_empty_string: new Fields.String({ defaultValue: '' }),
+				default_zero: new Fields.Number({ defaultValue: 0 }),
+				default_null: new Fields.Number({ nullable: true, defaultValue: null }),
+				default_false: new Fields.Boolean({ nullable: true, defaultValue: false }),
 			};
 
 			const model = new TestModel();
-			console.log(model);
 			expect(model.test_field).to.be.eql('functional vlaue');
 			expect(model.test_field_auto).to.be.eql(54);
+
+			expect(model.default_empty_string).to.be.eql('');
+			expect(model.default_zero).to.be.eql(0);
+			expect(model.default_null).to.be.eql(null);
+			expect(model.default_false).to.be.eql(false);
 		});
 	})
 });
