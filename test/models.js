@@ -412,4 +412,19 @@ describe('Models', () => {
 			});
 		});
 	});
+
+	describe('Fields', () => {
+		it('Should fill model with default values', () => {
+			class TestModel extends Model {}
+			TestModel.VALIDATION_SCHEMA = {
+				test_field: new Fields.String({ defaultValue: () => 'functional vlaue' }),
+				test_field_auto: new Fields.Number({ defaultValue: 54 }),
+			};
+
+			const model = new TestModel();
+			console.log(model);
+			expect(model.test_field).to.be.eql('functional vlaue');
+			expect(model.test_field_auto).to.be.eql(54);
+		});
+	})
 });
