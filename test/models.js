@@ -485,6 +485,11 @@ describe('Models', () => {
 				mm_id: fk.pk
 			});
 
+			const db_form = t_m.toDataBase();
+			expect(db_form).to.have.property('mm_id');
+			expect(db_form).to.not.have.property('mm');
+			expect(db_form.mm_id).to.be.eql(fk.pk);
+
 			fk.save().then(() => {
 				return t_m.save();
 			}).then(() => {
@@ -523,6 +528,7 @@ describe('Models', () => {
 
 			const db_form = t_m.toDataBase();
 			expect(db_form).to.have.property('mm_ids');
+			expect(db_form).to.not.have.property('mm');
 			expect(db_form.mm_ids.every(item => !(item instanceof Object))).to.be.true;
 
 			Promise.all([fk.save(), fk2.save()]).then(() => {
@@ -567,6 +573,7 @@ describe('Models', () => {
 
 			const db_form = t_m.toDataBase();
 			expect(db_form).to.have.property('mm_ids');
+			expect(db_form).to.not.have.property('mm');
 			expect(db_form.mm_ids.every(item => !(item instanceof Object))).to.be.true;
 
 			Promise.all([fk.save(), fk2.save()]).then(() => {
@@ -584,6 +591,37 @@ describe('Models', () => {
 				expect(test_model.mm[1]).to.be.instanceof(FKModel);
 				expect(test_model.mm[0].pk).to.be.eql(fk.pk);
 				expect(test_model.mm[1].pk).to.be.eql(fk2.pk);
+				done();
+			}).catch(e => {
+				done(e);
+			});
+		});
+
+		it('Should store foreign keys and retrieve a single item', done => {
+			class FKModel extends Model {}
+			FKModel.VALIDATION_SCHEMA = {
+				plep: new Fields.PrimaryKey({ defaultValue: () => Math.random() }),
+			};
+
+			class TestModel extends Model {}
+			TestModel.VALIDATION_SCHEMA = {
+				str: new Fields.String(),
+				mm: new Fields.ForeignKey({ many: true, Model: FKModel, defaultValue: [] })
+			};
+
+			const t_m = new TestModel({ str: 'plep' });
+
+			const db_form = t_m.toDataBase();
+			expect(db_form).to.have.property('mm_ids');
+			expect(db_form).to.not.have.property('mm');
+			expect(db_form.mm_ids.every(item => !(item instanceof Object))).to.be.true;
+
+			t_m.save().then((t_m) => {
+				expect(t_m).to.have.property('_id');
+				return TestModel.objects.get({ _id: t_m._id});
+			}).then((test_model) => {
+				expect(Array.isArray(test_model.mm_ids)).to.be.true;
+				expect(test_model.mm_ids).to.have.length(0);
 				done();
 			}).catch(e => {
 				done(e);
