@@ -205,6 +205,33 @@ describe('Fields', () => {
 			expect(field.validate(2.124)).to.be.false;
 			expect(field.validate(Symbol(123))).to.be.false;
 		});
+
+		for(const [shape, value, expected_result, strict=false] of [
+			[{ a: Fields.ANY }, { a: 'plep' }, true],
+			[{ a: Fields.ANY }, { a: {} }, true],
+			[{ a: Fields.ANY }, { a: 5 }, true],
+			[{ a: Fields.ANY }, { a: false }, true],
+			[{ a: Fields.ANY }, { a: null }, true],
+			[{ a: Fields.ANY }, { a: undefined }, true],
+			[{ a: Fields.ANY }, { b: null }, true],
+			[{ a: Fields.ANY }, { b: null }, false, true],
+			[{ a: new Fields.String() }, { a: {} }, false],
+			[{ a: new Fields.String() }, { a: 'plep' }, true],
+			[{ a: new Fields.String({ blank: true }) }, { a: '' }, true],
+			[{ a: new Fields.String({ blank: false }) }, { a: '' }, false],
+			[{ a: { b: Fields.ANY, c: Fields.ANY } }, { a: { b: null, c: null } }, true],
+			[{ a: { b: Fields.ANY, c: Fields.ANY } }, { a: { b: null } }, true],
+			[{ a: { b: Fields.ANY, c: Fields.ANY } }, { a: { b: null } }, false, true],
+		]) {
+			it(`Validates shapes - ${JSON.stringify(shape)} - ${JSON.stringify(value)} - Strict: ${strict}`, () => {
+				const field = new Fields.Object({ strict, shape });
+				if(expected_result === false) {
+					expect(() => field.validate(value)).to.throw(Error);
+				} else {
+					expect(field.validate(value)).to.be.true;
+				}
+			});
+		}
 	});
 
 	describe('Array field', () => {
