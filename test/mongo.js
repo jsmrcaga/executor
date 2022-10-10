@@ -4,55 +4,16 @@ const { expect } = require('chai');
 
 describe('Mongo Client', () => {
 	const connection_config = {
-		url: `mongodb://db:27017/mongo`,
+		url: `mongodb://db:27017/mongo?replicaSet=mongoset&directConnection=true`,
 		options: {
 			useUnifiedTopology: true
 		},
 		database: 'mongo'
 	};
 
-	it('Builds URL from config options', () => {
-		const mongo = new Mongo.constructor();
-		mongo.config({
-			connection: {
-				host: 'host',
-				database: 'db',
-				protocol: 'mongodb',
-				port: 1234,
-				username: 'username',
-				password: 'password',
-				query: {
-					direct: true
-				}
-			}
-		});
-
-		expect(mongo.get_connection_url()).to.be.eql('mongodb://username:password@host:1234/db?direct=true');
-	});
-
 	it('Connects (& disconnects) to mongo instance using config', done => {
 		const mongo = new Mongo.constructor();
-		mongo.config(connection_config);
-		mongo.connect().then(() => {
-			return mongo.disconnect();
-		}).then(() => {
-			done();
-		}).catch(e => done(e));
-	});
-
-	it('Connects (& disconnects) to mongo instance using config with connection_options', done => {
-		const mongo = new Mongo.constructor();
-		mongo.config({
-			connection: {
-				protocol: 'mongodb',
-				host: 'db',
-				port: 27017,
-				database: 'mongo',
-			},
-			options: {
-				useUnifiedTopology: true
-			}
-		});
+		mongo.init(connection_config);
 		mongo.connect().then(() => {
 			return mongo.disconnect();
 		}).then(() => {
