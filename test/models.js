@@ -251,7 +251,7 @@ describe('Models', () => {
 			});
 		});
 
-		describe.skip('Transactions', () => {
+		describe('Transactions', () => {
 			describe('db.atomic', () => {
 				it('db.atomic - It performs a transaction', done => {
 					connection.db.atomic(session => {
@@ -266,14 +266,44 @@ describe('Models', () => {
 					}).catch(e => done(e));
 				});
 
+				it('db.atomic - It performs a transaction with multiple objects', done => {
+					class TransactionModel extends Model {}
+					connection.db.atomic(session => {
+						const test = new MyTestModel({ plep: 45 });
+						const transaction_test = new TransactionModel({ something_else: 'value' });
+						return Promise.all([test.save({ session }), transaction_test.save({ session })]);
+					}).then(result => {
+						return Promise.all([
+							MyTestModel.objects.get({ plep: 45 }),
+							TransactionModel.objects.get({ something_else: 'value' })
+						]);
+					}).then(([ doc, transaction_doc ]) => {
+						expect(doc).not.to.be.undefined;
+						expect(doc.plep).to.be.eql(45);
+
+						expect(transaction_doc).not.to.be.undefined;
+						expect(transaction_doc.something_else).to.be.eql('value');
+						done();
+					}).catch(e => done(e));
+				});
+
 				it('db.atomic - Rollbacks a transaction', done => {
 					connection.db.atomic(session => {
 						let test = new MyTestModel({ plep: 45 });
-						return test.save({ session }).then(() => {
-							throw new Error('ROLLBACK ME PLEASE');
+						test.save({ session });
+						// throw error in session
+						throw new Error('ROLLBACK ME PLEASE');
+					}).catch(e => {
+						expect(() => {
+							throw e;
+						}).to.throw(Error, /ROLLBACK ME PLEASE/);
+
+						// Wait until the first save has passed
+						return new Promise((resolve) => {
+							setTimeout(() => {
+								resolve(MyTestModel.objects.get({ plep: 45 }));
+							}, 50);
 						});
-					}).then(result => {
-						return MyTestModel.objects.get({ plep: 45 });
 					}).then(doc => {
 						done('Doc exists, not rollbacked!');
 					}).catch(e => {
@@ -404,7 +434,7 @@ describe('Models', () => {
 					}).catch(e => {
 						expect(() => {
 							throw e;
-						}).to.throw(Error, /No document matching query!/);
+						}).to.throw(Error, /No document matching query/);
 						done();
 					});
 				});
@@ -510,7 +540,7 @@ describe('Models', () => {
 		it('Should store foreign keys in array and be able to get objects back', done => {
 			class FKModel extends Model {}
 			FKModel.VALIDATION_SCHEMA = {
-				plep: new Fields.PrimaryKey({ defaultValue: () => Math.random() }),
+				plep: new Fields.PrimaryKey(),
 			};
 
 			class TestModel extends Model {}
@@ -519,8 +549,12 @@ describe('Models', () => {
 			};
 
 			// With instance
-			const fk = new FKModel();
-			const fk2 = new FKModel();
+			const fk = new FKModel({
+				plep: 'id1'
+			});
+			const fk2 = new FKModel({
+				plep: 'id2'
+			});
 
 			const t_m = new TestModel({
 				mm: [fk, fk2]
@@ -537,15 +571,18 @@ describe('Models', () => {
 				return TestModel.objects.filter().done();
 			}).then(([test_model]) => {
 				expect(Array.isArray(test_model.mm_ids)).to.be.true;
-				expect(test_model.mm_ids[0]).to.be.eql(fk.pk);
-				expect(test_model.mm_ids[1]).to.be.eql(fk2.pk);
+				const ids = [...test_model.mm_ids].sort();
+				expect(ids[0]).to.be.eql('id1');
+				expect(ids[1]).to.be.eql('id2');
 				return TestModel.objects.all().select_related('mm').done();
 			}).then(([test_model]) => {
 				expect(Array.isArray(test_model.mm)).to.be.true;
 				expect(test_model.mm[0]).to.be.instanceof(FKModel);
 				expect(test_model.mm[1]).to.be.instanceof(FKModel);
-				expect(test_model.mm[0].pk).to.be.eql(fk.pk);
-				expect(test_model.mm[1].pk).to.be.eql(fk2.pk);
+
+				const pks = test_model.mm.map(model => model.pk).sort();
+				expect(pks[0]).to.be.eql('id1');
+				expect(pks[1]).to.be.eql('id2');
 				done();
 			}).catch(e => {
 				done(e);
@@ -564,8 +601,12 @@ describe('Models', () => {
 			};
 
 			// With instance
-			const fk = new FKModel();
-			const fk2 = new FKModel();
+			const fk = new FKModel({
+				plep: 'id1'
+			});
+			const fk2 = new FKModel({
+				plep: 'id2'
+			});
 
 			const t_m = new TestModel({
 				mm: [fk, fk2]
@@ -582,15 +623,18 @@ describe('Models', () => {
 				return TestModel.objects.filter().done();
 			}).then(([test_model]) => {
 				expect(Array.isArray(test_model.mm_ids)).to.be.true;
-				expect(test_model.mm_ids[0]).to.be.eql(fk.pk);
-				expect(test_model.mm_ids[1]).to.be.eql(fk2.pk);
+				const ids = [...test_model.mm_ids].sort();
+				expect(ids[0]).to.be.eql('id1');
+				expect(ids[1]).to.be.eql('id2');
 				return TestModel.objects.all().select_related('mm').done();
 			}).then(([test_model]) => {
 				expect(Array.isArray(test_model.mm)).to.be.true;
 				expect(test_model.mm[0]).to.be.instanceof(FKModel);
 				expect(test_model.mm[1]).to.be.instanceof(FKModel);
-				expect(test_model.mm[0].pk).to.be.eql(fk.pk);
-				expect(test_model.mm[1].pk).to.be.eql(fk2.pk);
+
+				const pks = test_model.mm.map(model => model.pk).sort();
+				expect(pks[0]).to.be.eql('id1');
+				expect(pks[1]).to.be.eql('id2');
 				done();
 			}).catch(e => {
 				done(e);

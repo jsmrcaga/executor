@@ -6,7 +6,7 @@
   "main": "mongo.js",
   "scripts": {
     "test": "docker-compose run --rm app npm run mocha",
-    "mocha": "mocha --exit --recursive test -s 50"
+    "mocha": "sleep 5 && mocha --exit --recursive test -s 50"
   },
   "author": {
     "name": "Jo Colina",
@@ -19,7 +19,7 @@
     "nyc": "^13.3.0"
   },
   "dependencies": {
-    "mongodb": "^4.3.0"
+    "mongodb": "^4.10.0"
   },
   "repository": {
     "type": "git",

@@ -1,8 +1,20 @@
 print('\nINSTANCIATING REPLICA SET\n');
 
+print('STATUS:\n');
 rs.status();
-rs.initiate();
-rs.slaveOk();
+print('STATUS END\n');
+
+print('INITIATE\n');
+rs.initiate({
+	_id: 'mongoset',
+	members: [{
+		_id: 1,
+		host: "localhost:27017",
+		priority: 1
+	}]
+});
+print('INITIATE END\n');
+// rs.secondaryOk();
 
 print('\nREPLICA SET STARTUP DONE\n');
 

@@ -10,7 +10,7 @@ module.exports = {
 		beforeEach(done => {
 			Mongo.connect({
 				// url: `mongodb://mongo-db:27017/mongo?replicaSet=mongoset&readPreference=primary&connect=direct`,
-				url: `mongodb://db:27017/mongo`,
+				url: `mongodb://db:27017/mongo?replicaSet=mongoset&directConnection=true`,
 				options: {
 					useUnifiedTopology: true,
 				},

@@ -174,14 +174,16 @@ describe('Queryset', () => {
 			querysetB = new Queryset({ Model: ModelB });
 			querysetC = new Queryset({ Model: CustomPk });
 
-			let promises = [
-				connection.db.clear(),
-				querysetA.bulk_insert([a1, a2, a3]),
-				querysetB.bulk_insert([b1, b2, b3, b4]),
-				querysetC.bulk_insert([c1, c2])
-			];
 
-			Promise.all(promises).then(() => {
+			connection.db.clear().then(() => {
+				let promises = [
+					querysetA.bulk_insert([a1, a2, a3]),
+					querysetB.bulk_insert([b1, b2, b3, b4]),
+					querysetC.bulk_insert([c1, c2])
+				];
+
+				return Promise.all(promises);
+			}).then(() => {
 				done();
 			}).catch(e => {
 				done(e);

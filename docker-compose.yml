@@ -2,12 +2,13 @@ version: "3.1"
 services:
   db:
     image: mongo:5
-    container_name: mongo-db
+    container_name: executor-test
     ports:
-      - "27017:27017"
-    # command: --replSet "mongoset" --bind_ip_all
-    # volumes:
-    #   - ./docker:/docker-entrypoint-initdb.d:ro
+      - "27777:27017"
+    command: --replSet "mongoset" --bind_ip_all
+    volumes:
+      # to run commands for mongo startup
+      - ./docker:/docker-entrypoint-initdb.d:ro
 
   app:
     build: .
