@@ -709,5 +709,37 @@ describe('Models', () => {
 				done();
 			}).catch(e => done(e));
 		});
+
+		it('Adds default values to model if they did not exist in DB without breaking foreign keys', done => {
+			class FakeModel2 extends Model {}
+			class FakeModel extends Model {}
+			FakeModel.VALIDATION_SCHEMA = {
+				fk_field: new Fields.ForeignKey({ Model: FakeModel2 }),
+				some_field: new Fields.String({
+					defaultValue: '35'
+				}),
+				other_field: new Fields.String()
+			};
+
+			const fake_model = new FakeModel({ fk_field_id: 54, some_field: '54' });
+			fake_model.save().then((saved_fake_model) => {
+				expect(saved_fake_model).to.not.have.property('extra_field');
+				expect(saved_fake_model).to.not.have.property('fk_field');
+
+				saved_fake_model.other_field = 'plep';
+
+				return saved_fake_model.save();
+			}).then(() => {
+				return FakeModel.objects.get({ some_field: '54' });
+			}).then(new_fake_model => {
+				expect(new_fake_model).to.not.have.property('fk_field');
+				// Check that changing the validation schema did not break defaultValues vs existing values
+				expect(new_fake_model.some_field).to.be.eql('54');
+				expect(new_fake_model.other_field).to.be.eql('plep');
+				expect(new_fake_model.fk_field_id).to.be.eql(54);
+
+				done();
+			}).catch(e => done(e));
+		});
 	})
 });
