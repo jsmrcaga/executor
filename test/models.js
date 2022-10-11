@@ -671,5 +671,43 @@ describe('Models', () => {
 				done(e);
 			});
 		});
+
+
+		it('Adds default values to model if they did not exist in DB', done => {
+			class FakeModel extends Model {}
+			FakeModel.VALIDATION_SCHEMA = {
+				some_field: new Fields.String({
+					defaultValue: '35'
+				})
+			};
+
+			const fake_model = new FakeModel({ some_field: '54' });
+			fake_model.save().then((saved_fake_model) => {
+				FakeModel.VALIDATION_SCHEMA = {
+					...FakeModel.VALIDATION_SCHEMA,
+					extra_field: new Fields.Object({
+						defaultValue: {
+							'a': 'b',
+							'c': 'd'
+						}
+					})
+				};
+
+				expect(saved_fake_model).to.not.have.property('extra_field');
+
+				return FakeModel.objects.get({
+					some_field: '54'
+				});
+			}).then(new_fake_model => {
+				// Check that changing the validation schema did not break defaultValues vs existing values
+				expect(new_fake_model.some_field).to.be.eql('54');
+				expect(new_fake_model.extra_field).to.be.deep.eql({
+					'a': 'b',
+					'c': 'd'
+				});
+
+				done();
+			}).catch(e => done(e));
+		});
 	})
 });
