@@ -597,6 +597,40 @@ describe('Queryset', () => {
 			});
 		});
 
+		describe('Count', () => {
+			it('Should count models filtered & unfiltered', done => {
+				// 3 objects already exist from fixture
+				const models = [1, 2, 3, 4].map(i => {
+					const model = new ModelA({
+						a: 1,
+						index: i
+					});
+
+					return model.save();
+				});
+
+				Promise.all(models).then(() => {
+					return ModelA.objects.count();
+				}).then(count => {
+					expect(count).to.be.eql(7);
+					return ModelA.objects.filter({ a: 1 }).count();
+				}).then(count => {
+					expect(count).to.be.eql(4);
+					return ModelA.objects.filter({
+						index: {
+							$gt: 1
+						}
+					}).count();
+				}).then(count => {
+					expect(count).to.be.eql(3);
+					return ModelA.objects.count('plep');
+				}).then(count => {
+					expect(count).to.be.eql(7);
+					done();
+				}).catch(e => done(e));
+			});
+		});
+
 		describe('Update', () => {
 			it('Should update multiple objects', done => {
 				let a1 = new ModelA({ _id: 1111, group: 'a', sort: 6 });
