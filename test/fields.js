@@ -98,6 +98,13 @@ describe('Fields', () => {
 			expect(field.validate('plop')).to.be.true;
 			expect(() => field.validate('plip')).to.throw(Error);
 		});
+
+		it('Validates length', () => {
+			const field = new Fields.String({ min: 2, max: 5 });
+			expect(() => field.validate('a')).to.throw('Min length');
+			expect(() => field.validate('abcdef')).to.throw('Max length');
+			expect(field.validate('abcd')).to.be.true;
+		});
 	});
 
 	describe('Numbers', () => {
@@ -340,5 +347,44 @@ describe('Fields', () => {
 			expect(() => field.cast(5)).to.throw(Error, 'ForeignKey field needs a model');
 			expect(field.cast({ plep: 32 })).to.be.an.instanceof(ModelA);
 		});
+	});
+
+	describe('Slug', () => {
+		for(const [str, result] of [
+			['plep', 'plep'],
+			['plep plop', 'plep_plop'],
+			['plep plop 456', 'plep_plop_456'],
+			['plépàôïû', 'plepaoiu'],
+			['plep !%$@#&()*&^${}[]\\|/?<>,.;:\'"+=~` plop', 'plep_plop'],
+		]) {
+			it(`Should slugify strings - ${str}/${result}`, () => {
+				expect(Fields.Slug.slugify(str)).to.be.eql(result);
+			});
+		}
+
+		for(const value of [
+			'plep',
+			'plep_plop',
+			'12323123',
+			'this-is-a-slug',
+			'some___weird___slug'
+		]) {
+			it(`Should validate slugs - ${value}`, () => {
+				const slug_field = new Fields.Slug();
+				expect(slug_field.validate(value, {}, 'plep')).to.be.true;
+			});
+		}
+
+		for(const value of [
+			'plep%',
+			'plep_plop space',
+			'12323123 é',
+			'î',
+		]) {
+			it(`Should not validate slugs - ${value}`, () => {
+				const slug_field = new Fields.Slug();
+				expect(() => slug_field.validate(value, {}, 'plep')).to.throw(Error, 'Invalid slug');
+			});
+		}
 	});
 });
