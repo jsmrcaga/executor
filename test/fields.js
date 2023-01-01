@@ -387,4 +387,59 @@ describe('Fields', () => {
 			});
 		}
 	});
+
+	describe('Map Field', () => {
+		for(const not_object of [
+			['this is an array'],
+			new Date(),
+			new WeakMap(),
+			true,
+			Symbol.for('test'),
+			() => {},
+			5,
+			null,
+			undefined
+		]) {
+			it(`Should not validate ${Object.prototype.toString.call(not_object)} as object`, () => {
+				const map_field = new Fields.Map();
+				expect(() => map_field.validate(not_object, {}, 'name')).to.throw(Error);
+			});
+		}
+
+		it('Should validate a simple map (object)', () => {
+			const map_field = new Fields.Map({
+				of: new Fields.String()
+			});
+
+			expect(() => map_field.validate({
+				test_key: 'test_string',
+				test_key2: 'test_string',
+			}, {}, 'name')).to.not.throw(Error);
+		});
+
+		it('Should validate a simple map (map)', () => {
+			const map_field = new Fields.Map({
+				of: new Fields.String()
+			});
+
+			const map = new Map();
+			map.set('a', 's1');
+			map.set('b', 's2');
+			map.set('c', 's3');
+
+			expect(() => map_field.validate(map, {}, 'name')).to.not.throw(Error);
+		});
+
+		it('Should fail validation', () => {
+			const map_field = new Fields.Map({
+				of: new Fields.Array()
+			});
+
+			expect(() => map_field.validate({
+				valid: ['array'],
+				invalid: 'string'
+				// We get the error from the array field, yay!
+			}, {}, 'name')).to.throw(Error, 'Invalid value "string" for field "name" of type "ArrayField"');
+		});
+	});
 });
