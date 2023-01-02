@@ -647,7 +647,9 @@ describe('Queryset', () => {
 							$in: [1111, 2222]
 						}
 					}).update({
-						group: 'test'
+						$set: {
+							group: 'test'
+						}
 					});
 				}).then(() => {
 					const qs = new Queryset({ Model: ModelA });
