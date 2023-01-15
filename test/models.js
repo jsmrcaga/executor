@@ -442,6 +442,111 @@ describe('Models', () => {
 		});
 	});
 
+	describe('Events', () => {
+		beforeEach(done => {
+			const model = new MyTestModel();
+			model.save().then(() => done()).catch(e => done(e));
+		});
+
+		it('Should emit a save event', done => {
+			const on_save = (object, { metadata }) => {
+				expect(object).to.have.property('_id');
+				expect(metadata).to.have.property('result');
+				expect(metadata.result.insertedId).to.be.eql(object._id);
+				MyTestModel.removeEventListener('save', on_save);
+				done();
+			};
+			MyTestModel.on('save', on_save);
+			const model = new MyTestModel();
+			model.save();
+		});
+
+		it('Should emit an update event', done => {
+			const on_update = (object, { metadata }) => {
+				expect(object).to.be.instanceof(MyTestModel);
+				expect(metadata).to.have.property('data');
+
+				MyTestModel.removeEventListener('update', on_update);
+				done();
+			};
+
+			MyTestModel.on('update', on_update);
+			const model = new MyTestModel();
+			//emits save
+			model.save().then(() => {
+				model.name = 'plep';
+				// Emits update
+				model.save();
+			});
+		});
+
+		it('Should emit an update event with specific data', done => {
+			const on_update = (object, { metadata }) => {
+				expect(object).to.be.instanceof(MyTestModel);
+				expect(object.name).to.be.eql('plep');
+				expect(metadata).to.have.property('data');
+				expect(metadata).to.have.property('result');
+				expect(metadata.data).to.have.property('name');
+				expect(metadata.data.name).to.be.eql('plep');
+
+				expect(metadata.result.modifiedCount).to.be.eql(1);
+
+				MyTestModel.removeEventListener('update', on_update);
+				done();
+			};
+
+			MyTestModel.on('update', on_update);
+			const model = new MyTestModel();
+			//emits save
+			model.save().then(() => {
+				// Emits update
+				model.update({
+					name: 'plep'
+				});
+			});
+		});
+
+		it('Should emit a delete event with specific data', done => {
+			const on_delete = (object, { metadata }) => {
+				expect(object).to.be.instanceof(MyTestModel);
+				expect(object.__deleted).to.not.be.null;
+				expect(metadata).to.have.property('data');
+				expect(metadata).to.have.property('result');
+				expect(metadata.data).to.have.property('__deleted');
+				expect(metadata.data.name).to.not.be.null;
+				expect(metadata.result.modifiedCount).to.be.eql(1);
+
+				MyTestModel.removeEventListener('update', on_delete);
+				done();
+			};
+
+			MyTestModel.on('delete', on_delete);
+			const model = new MyTestModel();
+			//emits save
+			model.save().then(() => {
+				// Emits update
+				model.delete();
+			});
+		});
+
+		it('Should emit a hard_delete event', done => {
+			const on_hard_delete = (object, { metadata }) => {
+				expect(metadata).to.have.property('result');
+				expect(metadata.result.deletedCount).to.be.eql(1);
+				MyTestModel.removeEventListener('update', on_hard_delete);
+				done();
+			};
+
+			MyTestModel.on('hard_delete', on_hard_delete);
+			const model = new MyTestModel();
+			//emits save
+			model.save().then(() => {
+				// Emits update
+				model.hard_delete();
+			});
+		});
+	});
+
 	describe('Fields', () => {
 		it('Should fill model with default values', () => {
 			class TestModel extends Model {}
