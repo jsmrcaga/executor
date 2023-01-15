@@ -462,6 +462,28 @@ describe('Queryset', () => {
 			});
 		});
 
+
+		describe('Skip', () => {
+			it('skip - Should add a skip operation to the pipeline', () => {
+				let { pipeline } = querysetB.skip(13);
+				expect(pipeline[0].definition()).to.be.eql({
+					$skip: 13
+				});
+			});
+
+			it('skip - Should skip some docs', done => {
+				querysetB.all().done().then(docs => {
+					// verify that we haven't changed the length
+					// if someone else changes the tests
+					expect(docs.length).to.be.eql(4);
+					return querysetB.skip(3).done();
+				}).then(docs => {
+					expect(docs.length).to.be.eql(1);
+					done();
+				}).catch(e => done(e));
+			});
+		});
+
 		describe('Project', () => {
 			it('project - Should add a project operation to the pipeline', () => {
 				let { pipeline } = querysetB.project({
